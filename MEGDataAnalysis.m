@@ -3,8 +3,9 @@
 % This script runs the decoding analysis of Higgins et al 2022 on the data
 % publicaly available at the following URL. This data should be downloaded
 % to the 'rawdatadir' specified below.
-
-%spectralmethod = 'stft'; % delete this later
+%
+% Data URL for download:
+% http://userpage.fu-berlin.de/rmcichy/fusion_project_page/main.html
 
 % Set directories:
 rawdatadirdir = 'F:\My Data\Cichy2014\';
@@ -87,7 +88,7 @@ for iSj=1:15
             acc = zeros(nF,ttrial,ncomparisons);
             preds = zeros(nF,ttrial,60);
             % load data and reshape:
-            load([workingdir,'subj',sprintf('%02d',iSj),Spectdatafolder,'cond',sprintf('%04d',icond1),fnamesuffix,'.mat'],'data');;
+            load([workingdir,'subj',sprintf('%02d',iSj),Spectdatafolder,'cond',sprintf('%04d',icond1),fnamesuffix,'.mat'],'data');
             temp2 = load([workingdir,'subj',sprintf('%02d',iSj),Spectdatafolder,'cond',sprintf('%04d',icond2),fnamesuffix,'.mat'],'data');
             data = cat(2,data,temp2.data);
             data = reshape(data,[nCh*2,ttrial,60,nF]);
