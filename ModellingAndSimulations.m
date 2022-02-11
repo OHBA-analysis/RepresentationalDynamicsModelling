@@ -5,7 +5,7 @@
 % setup paths and figure directories:
 figdir = '/Users/chiggins/Documents/Figures_RepDynamics/';
 mkdir(figdir)
-addpath(genpath('/Users/chiggins/Documents/MATLAB/HigginsElife2022'));
+addpath(genpath('/Users/chiggins/Documents/MATLAB/RepresentationalDynamicsModelling'));
 
 %% Figure 1:
 
@@ -48,8 +48,9 @@ print([figdir,'Fig1'],'-dpng');
 t = 0.001:0.001:0.1;
 s = 0.5; % noise magnitude
 f = 10; % frequency of signal
-a = 0.8; % magnitude
-x1 = a*sin(2*pi*f*t); % first channel, first condition
+a = 1.5; % magnitude
+theta = [-pi/2,-pi/2]; % set phase offset
+x1 = a*cos(2*pi*f*t + theta(1)); % first channel, first condition
 xnull = 0*t; % first channel, second condition
 
 figure('Position',[1 57 1440 748]);
@@ -72,7 +73,7 @@ plot4paper('Freq (Hz)','PSD');
 
 subplot(3,4,5);
 a2 = a*0.5;
-x2 = a2*sin(2*pi*f*t); % second channel, first condition
+x2 = a2*cos(2*pi*f*t + theta(2)); % second channel, first condition
 xnull = xnull; % second channel, second condition (same as first channel)
 shadedErrorBar(t,x2,s*ones(length(t),1),{'LineWidth',2,'Color','Blue'},0.7);hold on;
 shadedErrorBar(t,xnull,s*ones(length(t),1),{'LineWidth',2,'Color','Black'},0.7)
@@ -93,7 +94,7 @@ plot4paper('Freq (Hz)','PSD');
 subplot(3,4,9);
 % compute MI using formulas in paper:
 A = diag([a,a2]);
-theta = [-pi/2,-pi/2];
+
 Sig = s.^2*eye(2); % noise covariance matrix
 c_om = 0.5*trace(A*inv(Sig)*A*cos(theta-theta'));
 temp1 = 0.5*trace(A*inv(Sig)*A*sin(theta+theta'));
