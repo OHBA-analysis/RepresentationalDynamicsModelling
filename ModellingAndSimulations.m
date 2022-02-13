@@ -40,6 +40,188 @@ plot(t,alphaterm(:,2),'r','LineWidth',2,'LineStyle','--');
 print([figdir,'Fig1'],'-dpng');
 
 
+%% also make gif files:
+
+h = figure('Position',[440 462 2*285 336],'Color','white');
+giffilename = [figdir,'Fig1_pendulum1.gif'];
+for it = 1:2:length(t)
+    clear l
+    ax1 = subplot(2,2,2);
+    plot(t,x,'k','LineWidth',2);
+    plot4paper('Time','Displacement');
+    hold on;
+    l(1) = plot(t(it),x(it),'k.','MarkerSize',40);
+    ylim([-1.2,1.2])
+    %hold off;
+    %plot(t,x_dash,'r','LineWidth',2,'LineStyle','--');
+    %hold on;
+    %l(2) = plot(t(it),x_dash(it),'r.','MarkerSize',40);
+    
+    %legend('{\it x}')
+    clear l
+    l(1) = plot(nan,nan,'k.-','LineWidth',2,'MarkerSize',40);
+    %l(2) = plot(nan,nan,'r.--','LineWidth',2,'MarkerSize',40);
+    hold off;
+    leg1 = legend(l,{'{$x$}'},'Interpreter','latex')
+    %leg = legend(l,{'I[{$x$}]','I[$x,\dot{x}$]'}, 'Interpreter','latex');
+    %leg1 = legend(l,{'1','2'},'Interpreter','latex')
+    set(leg1,'Position',[0.8858 0.7198 0.0864 0.1162])
+    %legend('$\dot{x}$', 'Interpreter','latex')
+    % and plot information content associated with this:
+    sigma = 0.5;
+    for i=1:length(t)
+        alphaterm(i,1) = 2*x(i).^2/sigma;
+        alphaterm(i,2) = 2*[x(i),x_dash(i)]*inv(diag([sigma,sigma]))*[x(i),x_dash(i)]';
+    end
+    clear l;
+    set(ax1,'Position',[0.5 0.6301 0.35 0.2949])
+    subplot(2,2,4);
+    plot(t,alphaterm(:,1),'k','LineWidth',2);
+    plot4paper('Time','Info Content');
+    set(gca,'YTick','')
+    ylim([0,alphaterm(1,2)*1.2]);
+    hold on;
+    plot(t(it),alphaterm(it,1),'k.','MarkerSize',40);
+    
+    
+    %plot(t,alphaterm(:,2),'r','LineWidth',2,'LineStyle','--');
+    %plot(t(it),alphaterm(it,2),'r.','MarkerSize',40);
+    
+    l(1) = plot(nan,nan,'k.-','LineWidth',2,'MarkerSize',40);
+    %l(2) = plot(nan,nan,'r.--','LineWidth',2,'MarkerSize',40);
+    hold off;
+    %legend(l,{'I{x}','I(x,)'},'Interpreter','latex','Location','SouthWest')
+    leg = legend(l,{'I[{$x$}]'}, 'Interpreter','latex');
+    set(leg,'Position', [0.8586 0.2124 0.1352 0.1162])
+    set(gca,'Position',[0.503 0.13063 0.35 0.2949])
+    % plot actual pendulum:
+    subplot(1,2,1)
+    %axis off
+    
+    r = 0.5;
+    offset(1) = cos(r*x(it) - pi/2);
+    offset(2) = sin(r*x(it) - pi/2);
+    plot([0,offset(1)],[0,offset(2)],'k','LineWidth',2)
+    %axis off
+    ax=get(gca);
+    
+    ax.XAxis.Label.Color=[0 0 0];
+    ax.XAxis.Label.Visible='on';
+    ax.XRuler.Axle.Visible = 'off'; % ax is axis handle
+    ax.YRuler.Axle.Visible = 'off'; 
+    set(gca,'XTick',[]);
+    set(gca,'YTick',[]);
+    set(gca,'Visible','off')
+    hold on;
+    plot(offset(1),offset(2),'k.','MarkerSize',40)
+    hold off;
+    xlim(0.5*[-1,1])
+    ylim([-1,0])
+    axis square
+    labeltext = '$\begin{array}{c}{\it x} =$ Displacement$\\\end{array}$';
+    xlabel(labeltext, 'Interpreter','latex','FontSize',20)
+
+    % Write to the GIF File 
+    frame = getframe(h); 
+      im = frame2im(frame); 
+      [imind,cm] = rgb2ind(im,256); 
+      if it == 1 
+          imwrite(imind,cm,giffilename,'gif', 'DelayTime',0.1,'Loopcount',inf); 
+      else 
+          imwrite(imind,cm,giffilename,'gif','WriteMode','append','DelayTime',0.07); 
+      end 
+end
+%
+h = figure('Position',[440 462 2*285 336],'Color','white');
+giffilename = [figdir,'Fig1_pendulum2.gif'];
+for it = 1:2:length(t)
+    clear l
+    ax1 = subplot(2,2,2);
+    plot(t,x,'k','LineWidth',2);
+    plot4paper('Time','Displacement');
+    hold on;
+    l(1) = plot(t(it),x(it),'k.','MarkerSize',40);
+    ylim([-1.2,1.2])
+    %hold off;
+    plot(t,x_dash,'r','LineWidth',2,'LineStyle','--');
+    %hold on;
+    l(2) = plot(t(it),x_dash(it),'r.','MarkerSize',40);
+    
+    %legend('{\it x}')
+    clear l
+    l(1) = plot(nan,nan,'k.-','LineWidth',2,'MarkerSize',40);
+    l(2) = plot(nan,nan,'r.--','LineWidth',2,'MarkerSize',40);
+    hold off;
+    leg1 = legend(l,{'{$x$}','$\dot{x}$'},'Interpreter','latex')
+    %leg = legend(l,{'I[{$x$}]','I[$x,\dot{x}$]'}, 'Interpreter','latex');
+    %leg1 = legend(l,{'1','2'},'Interpreter','latex')
+    set(leg1,'Position',[0.8858 0.7198 0.0864 0.1162])
+    %legend('$\dot{x}$', 'Interpreter','latex')
+    % and plot information content associated with this:
+    sigma = 0.5;
+    for i=1:length(t)
+        alphaterm(i,1) = 2*x(i).^2/sigma;
+        alphaterm(i,2) = 2*[x(i),x_dash(i)]*inv(diag([sigma,sigma]))*[x(i),x_dash(i)]';
+    end
+    clear l;
+    set(ax1,'Position',[0.5 0.6301 0.35 0.2949])
+    subplot(2,2,4);
+    plot(t,alphaterm(:,1),'k','LineWidth',2);
+    plot4paper('Time','Info Content');
+    set(gca,'YTick','')
+    ylim([0,alphaterm(1,2)*1.2]);
+    hold on;
+    plot(t(it),alphaterm(it,1),'k.','MarkerSize',40);
+    
+    
+    plot(t,alphaterm(:,2),'r','LineWidth',2,'LineStyle','--');
+    plot(t(it),alphaterm(it,2),'r.','MarkerSize',40);
+    
+    l(1) = plot(nan,nan,'k.-','LineWidth',2,'MarkerSize',40);
+    l(2) = plot(nan,nan,'r.--','LineWidth',2,'MarkerSize',40);
+    hold off;
+    %legend(l,{'I{x}','I(x,)'},'Interpreter','latex','Location','SouthWest')
+    leg = legend(l,{'I[{$x$}]','I[$x,\dot{x}$]'}, 'Interpreter','latex');
+    set(leg,'Position', [0.8586 0.2124 0.1352 0.1162])
+    set(gca,'Position',[0.503 0.13063 0.35 0.2949])
+    % plot actual pendulum:
+    subplot(1,2,1)
+    %axis off
+    
+    r = 0.5;
+    offset(1) = cos(r*x(it) - pi/2);
+    offset(2) = sin(r*x(it) - pi/2);
+    plot([0,offset(1)],[0,offset(2)],'k','LineWidth',2)
+    %axis off
+    ax=get(gca);
+    
+    ax.XAxis.Label.Color=[0 0 0];
+    ax.XAxis.Label.Visible='on';
+    ax.XRuler.Axle.Visible = 'off'; % ax is axis handle
+    ax.YRuler.Axle.Visible = 'off'; 
+    set(gca,'XTick',[]);
+    set(gca,'YTick',[]);
+    set(gca,'Visible','off')
+    hold on;
+    plot(offset(1),offset(2),'k.','MarkerSize',40)
+    hold off;
+    xlim(0.5*[-1,1])
+    ylim([-1,0])
+    axis square
+    labeltext = '$\begin{array}{c}{\it x} =$ Displacement$\\{\dot{x}} =$ Velocity$\end{array}$';
+    xlabel(labeltext, 'Interpreter','latex','FontSize',20)
+
+    % Write to the GIF File 
+    frame = getframe(h); 
+      im = frame2im(frame); 
+      [imind,cm] = rgb2ind(im,256); 
+      if it == 1 
+          imwrite(imind,cm,giffilename,'gif', 'DelayTime',0.1,'Loopcount',inf); 
+      else 
+          imwrite(imind,cm,giffilename,'gif','WriteMode','append','DelayTime',0.07); 
+      end 
+end
+
 %% Figure 2: 
 
 % Simulate the examples shown in figure 2:
@@ -187,7 +369,7 @@ grid minor;
 plot4paper('Time (sec)','f^{-1}(I_{X,Y})');
 
 subplot(3,4,12);
-a3 = 0.6;
+
 stem([2*f,2*f2,f2-f,abs(f+f2)],[1.5,1,0.3,0.4],'LineWidth',2,'Color','Black')
 xlim([0,40.5]);
 ylim([0,2]);
