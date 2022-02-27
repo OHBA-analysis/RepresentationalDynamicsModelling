@@ -543,7 +543,6 @@ for ifreq=1:2
         2*temp1.*temp2.*cos(temp3 - temp4)));
     Phi_omega{ifreq} = atan2(temp1.*sin(temp3) + temp2.*sin(temp4 + pi),temp1.*cos(temp3) + temp2.*cos(temp4 + pi))';
     Phi_mean{ifreq} = -pi/2 + atan2(temp1.*sin(temp3 + pi/2) + temp2.*sin(temp4 + pi/2),temp1.*cos(temp3 + pi/2) + temp2.*cos(temp4 + pi/2))';
-    
 end
 
 % find the information content terms:
@@ -738,10 +737,10 @@ xchirp = 0.75*chirp(t,50,0.1,2,'logarithmic',270);
 
 t = 0.001:0.001:0.3;
 
-Sigma = Sig; % noise covariance
 x1 = [zeros(1,100),xchirp,zeros(1,100)];
 xnull = 0*t;
-s = 0.5;
+s = 0.25;
+Sigma = s.^2*eye(2); % noise covariance
 figure('Position',[1 57 1440 748]);
 subplot(3,6,1);
 
@@ -802,7 +801,7 @@ for i=1:2 % iterate over STFT window size parameters
     subplot(3,6,13+i);
     
     for it=1:length(t)
-        acc(it) = [(x1(it)-xnull(it));(x2(it)-xnull(it))]'*inv(Sigma)*[(x1(it)-xnull(it));(x2(it)-xnull(it))];
+        acc(it) = 0.5*[(x1(it)-xnull(it));(x2(it)-xnull(it))]'*inv(Sigma)*[(x1(it)-xnull(it));(x2(it)-xnull(it))];
     end
     input = [zeros(1,W(i)),acc,zeros(1,W(i))];
     [Ptemp,F,T] = spectrogram(input,W(i),W(i)-1,[1:1:100],1/diff(t(1:2)));
@@ -821,7 +820,7 @@ end
 % plot the MI term of the broadband signal vs time:
 subplot(3,6,13);
 for i=1:length(t)
-    acc(i) = [(x1(i)-xnull(i));(x2(i)-xnull(i))]'*inv(Sigma)*[(x1(i)-xnull(i));(x2(i)-xnull(i))];
+    acc(i) = 0.5*[(x1(i)-xnull(i));(x2(i)-xnull(i))]'*inv(Sigma)*[(x1(i)-xnull(i));(x2(i)-xnull(i))];
 end
 plot(t,acc,'LineWidth',2,'Color','Black');
 xlim([0,max(t)]);
@@ -838,7 +837,7 @@ x1(100) = 1; % impulse function
 kernelfunc = 0.75*exp(-0.75*[-3:0.1:3].^2); % gaussian kernel
 x1 = conv(x1,kernelfunc,'same');
 
-s = Sigma(1);
+s = sqrt(Sigma(1));
 subplot(3,6,4);
 
 shadedErrorBar(t,x1,s*ones(length(t),1),{'LineWidth',2,'Color','Blue'},0.7);hold on;
@@ -888,7 +887,7 @@ for i=1:2  % iterate over the two STFT window size parameters
     % plot the MI terms in each frequency band vs time:
     subplot(3,6,16+i);
     for it=1:length(t)
-        acc(it) = [(x1(it)-xnull(it));(x2(it)-xnull(it))]'*inv(Sigma)*[(x1(it)-xnull(it));(x2(it)-xnull(it))];
+        acc(it) = 0.5*[(x1(it)-xnull(it));(x2(it)-xnull(it))]'*inv(Sigma)*[(x1(it)-xnull(it));(x2(it)-xnull(it))];
     end
     input = [zeros(1,W(i)),acc,zeros(1,W(i))];
     [Ptemp,F,T] = spectrogram(input,W(i),W(i)-1,[1:1:100],1/diff(t(1:2)));
@@ -907,7 +906,7 @@ end
 % plot the MI term of the broadband signal vs time:
 subplot(3,6,16)
 for i=1:length(t)
-    acc(i) = [(x1(i)-xnull(i));(x2(i)-xnull(i))]'*inv(Sigma)*[(x1(i)-xnull(i));(x2(i)-xnull(i))];
+    acc(i) = 0.5*[(x1(i)-xnull(i));(x2(i)-xnull(i))]'*inv(Sigma)*[(x1(i)-xnull(i));(x2(i)-xnull(i))];
 end
 plot(t,acc,'LineWidth',2,'Color','Black');
 hold on;
