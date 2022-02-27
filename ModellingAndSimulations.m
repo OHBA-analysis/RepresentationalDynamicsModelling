@@ -228,7 +228,7 @@ end
 
 % Example 1:
 t = 0.001:0.001:0.1;
-s = 0.5; % noise magnitude
+s = 0.5; % noise standard deviation
 f = 10; % frequency of signal
 a = 1.5; % magnitude
 theta = [-pi/2,-pi/2]; % set phase offset
@@ -275,18 +275,26 @@ plot4paper('Freq (Hz)','PSD');
 
 subplot(3,4,9);
 % compute MI using formulas in paper:
-A = diag([a,a2]);
+A = 0.5*diag([a,a2]);
 
 Sig = s.^2*eye(2); % noise covariance matrix
-c_om = 0.5*trace(A*inv(Sig)*A*cos(theta-theta'));
-temp1 = 0.5*trace(A*inv(Sig)*A*sin(theta+theta'));
-temp2 = 0.5*trace(A*inv(Sig)*A*cos(theta+theta'));
+c_om = trace(A*inv(Sig)*A*cos(theta-theta'));
+temp1 = trace(A*inv(Sig)*A*sin(theta+theta'));
+temp2 = trace(A*inv(Sig)*A*cos(theta+theta'));
 r_om = sqrt(temp1.^2 +temp2.^2);
 psi_om = atan2(temp1,temp2);
 alphaterm = c_om + r_om*cos(2*pi*2*f*t + psi_om);
 
+% sanity check:
+clear alphaterm2
+for i=1:length(t)
+    alphaterm2(i) = 2*[(x1(i)-xnull(i))/2;(x2(i)-xnull(i))/2]'*inv(Sig)*[(x1(i)-xnull(i))/2;(x2(i)-xnull(i))/2];
+end
+
 % and plot these terms:
 plot(t,alphaterm,'LineWidth',2,'Color','Black');
+hold on;
+plot(t,alphaterm2,'LineWidth',2,'Color','Black');
 xlim([0,max(t)]);
 axis square;
 grid minor;
@@ -296,7 +304,7 @@ subplot(3,4,10);
 a3 = c_om;
 stem(2*f,a3,'LineWidth',2,'Color','Black')
 xlim([0,40.5]);
-ylim([0,2]);
+%ylim([0,2]);
 axis square;
 grid minor;
 plot4paper('Freq (Hz)','PSD');
@@ -305,13 +313,16 @@ plot4paper('Freq (Hz)','PSD');
 
 % This example has multiple frequncy components:
 f2 = 1.5*f;
-a(1) = 0.7*0.7;
-a(2) = 1.1*0.7;
-x1 = a(1)*sin(2*pi*f*t) + a(2)*sin(2*pi*f2*t); % first channel, first condition
+freqs = [f;f2];
+a(1) = 0.5;
+a(2) = 0.77;
+phi = [-pi/2;-pi/2]; % set phase offset
+x1 = a*cos(2*pi*freqs*t + repmat(phi,1,length(t))); % first channel, first condition
 
 anull = 0.9*[0.2*a(1),0.6];
-xnull = anull(1)*sin(2*pi*f*t) + anull(2)*sin(2*pi*f2*t); % first channel, second condition
-s = 0.5;
+xnull = anull*sin(2*pi*freqs*t); % first channel, second condition
+
+s = 0.5; % set standard deviation of noise on each channel
 subplot(3,4,3);
 shadedErrorBar(t,x1,s*ones(length(t),1),{'LineWidth',2,'Color','Blue'},0.7);hold on;
 shadedErrorBar(t,xnull,s*ones(length(t),1),{'LineWidth',2,'Color','Black'},0.7)
@@ -322,8 +333,8 @@ plot4paper('Time (sec)','Magnitude');
 
 % and plot in Fourier Domain:
 subplot(3,4,4);
-stem([f,f2],[a],'LineWidth',2,'Color','Blue'); hold on;
-stem([f,f2],anull,'LineWidth',2,'Color','Black')
+stem(freqs,[a],'LineWidth',2,'Color','Blue'); hold on;
+stem(freqs,anull,'LineWidth',2,'Color','Black')
 xlim([0,40.5]);
 ylim([0,2]);
 axis square;
@@ -333,10 +344,12 @@ plot4paper('Freq (Hz)','PSD');
 subplot(3,4,7);
 a2(1) = 0.5*a(1);
 a2(2) = 1.5;
-x2 = a2(1)*sin(2*pi*f*t) + a2(2)*sin(2*pi*f2*t); % second channel, first condition
-xnull = xnull; % second channel, second condition (same as first channel)
+x2 = a2 * sin(2*pi*freqs*t); % second channel, first condition
+anull_2 = anull;
+xnull_2 = anull_2*sin(2*pi*freqs*t); % second channel, second condition (same as first channel)
+
 shadedErrorBar(t,x2,s*ones(length(t),1),{'LineWidth',2,'Color','Blue'},0.7);hold on;
-shadedErrorBar(t,xnull,s*ones(length(t),1),{'LineWidth',2,'Color','Black'},0.7)
+shadedErrorBar(t,xnull_2,s*ones(length(t),1),{'LineWidth',2,'Color','Black'},0.7)
 ylim([-2,2]);
 axis square;
 grid minor;
@@ -344,39 +357,243 @@ plot4paper('Time (sec)','Magnitude');
 
 % and plot in Fourier Domain:
 subplot(3,4,8);
-
-%shadedErrorBar(t,x1,s*ones(length(t),1),{'LineWidth',2,'Color','Black'},0.7)
-stem([f,f2],abs([a2]),'LineWidth',2,'Color','Blue');hold on;
-stem([f,f2],anull,'LineWidth',2,'Color','Black')
+stem(freqs,a2,'LineWidth',2,'Color','Blue');hold on;
+stem(freqs,anull_2,'LineWidth',2,'Color','Black')
 xlim([0,40.5]);
 ylim([0,2]);
 axis square;
 grid minor;
 plot4paper('Freq (Hz)','PSD');
-rng(1);
-subplot(3,4,11);
 
-rng(1);
-Sigma = Sig;
+% now we need to map these two channel signals back to the format given in
+% the paper:
+for ifreq=1:2
+    temp1 = [a(ifreq),a2(ifreq)];
+    temp2 = [anull(ifreq),anull_2(ifreq)];
+    temp3 = [-pi/2,-pi/2];
+    temp4 = [-pi/2,-pi/2];
+    A_omega{ifreq} = 0.5*diag(sqrt(temp1.^2+temp2.^2 + ...
+        2*temp1.*temp2.*cos(temp3 - temp4 + [-pi,-pi])));
+    mu_omega{ifreq} = 0.5*diag(sqrt(temp1.^2+temp2.^2 + ...
+        2*temp1.*temp2.*cos(temp3 - temp4)));
+    Phi_omega{ifreq} = atan2(temp1.*sin(temp3) + temp2.*sin(temp4 + pi),temp1.*cos(temp3) + temp2.*cos(temp4 + pi))';
+    Phi_mean{ifreq} = -pi/2 + atan2(temp1.*sin(temp3 + pi/2) + temp2.*sin(temp4 + pi/2),temp1.*cos(temp3 + pi/2) + temp2.*cos(temp4 + pi/2))';
+end
+
+% find the information content terms:
+c_b = 0;
+for ifreq=1:2
+    c_b = c_b + trace(A_omega{ifreq}*inv(Sigma)*A_omega{ifreq}*cos(Phi_omega{ifreq} - Phi_omega{ifreq}')); % equal to above expression
+    temp1 = trace(A_omega{ifreq}*inv(Sigma)*A_omega{ifreq}*cos(Phi_omega{ifreq} + Phi_omega{ifreq}'));
+    temp2 = trace(A_omega{ifreq}*inv(Sigma)*A_omega{ifreq}*sin(Phi_omega{ifreq} + Phi_omega{ifreq}'));
+    r_b(ifreq) = sqrt(temp1.^2 + temp2.^2)
+    psi(ifreq) = atan2(temp2,temp1);
+end
+
+% and cross-frequency components:
+ifreq1 = 1; ifreq2 = 2;
+
+temp1 = trace(A_omega{ifreq1}*inv(Sigma)*A_omega{ifreq2}*cos(Phi_omega{ifreq1} + Phi_omega{ifreq2}'));
+temp2 = trace(A_omega{ifreq1}*inv(Sigma)*A_omega{ifreq2}*sin(Phi_omega{ifreq1} + Phi_omega{ifreq2}'));
+r_b(3) = 2*sqrt(temp1.^2 + temp2.^2);
+psi(3) = atan2(temp2,temp1);
+
+
+temp1 = trace(A_omega{ifreq1}*inv(Sigma)*A_omega{ifreq2}*cos(Phi_omega{ifreq1} - Phi_omega{ifreq2}'));
+temp2 = trace(A_omega{ifreq1}*inv(Sigma)*A_omega{ifreq2}*sin(Phi_omega{ifreq2} - Phi_omega{ifreq1}'))
+r_b(4) = 2*sqrt(temp1.^2 + temp2.^2);
+psi(4) = atan2(temp2,temp1);
+
+infotermest = c_b;
+freqs_all = [2*freqs;sum(freqs);diff(freqs)];
+for ifreq=1:4
+    infotermest = infotermest + r_b(ifreq)*cos(2*pi*freqs_all(ifreq)*t + psi(ifreq));
+end
+
+subplot(3,4,11);
+Sigma = Sig + Sig; % broadband noise: sum over both frequency bands
+% note - as a sanity check, infotermest should be equal to alpha term computed as follows:
 for i=1:length(t)
-    alphaterm(i) = [(x1(i)-xnull(i));(x2(i)-xnull(i))]'*inv(Sigma)*[(x1(i)-xnull(i));(x2(i)-xnull(i))];
+    alphaterm(i) = 2*[(x1(i)-xnull(i))/2;(x2(i)-xnull_2(i))/2]'*inv(Sigma)*[(x1(i)-xnull(i))/2;(x2(i)-xnull_2(i))/2];
 end
 
 plot(t,alphaterm,'LineWidth',2,'Color','Black');
+
+%analytical version:
+infotermest = c_b;
+for ifreq=1:4
+    infotermest = infotermest + r_b(ifreq)*cos(2*pi*freqs_all(ifreq)*t + psi(ifreq))
+end
+freqs_all = [2*freqs;sum(freqs);diff(freqs)];
+
+%sanity check both are the same:
+hold on;
+plot(t,infotermest,'LineWidth',2,'Color','Black')
 xlim([0,max(t)]);
 axis square;
 grid minor;
 plot4paper('Time (sec)','f^{-1}(I_{X,Y})');
 
 subplot(3,4,12);
+%stem(freqs_all,[1.5,1,0.3,0.4],'LineWidth',2,'Color','Black')
+stem(freqs_all,r_b,'LineWidth',2,'Color','Black')
+xlim([0,40.5]);
+%ylim([0,2]);
+axis square;
+grid minor;
+plot4paper('Freq (Hz)','PSD');
+print([figdir,'Fig2_InfoSpectrum'],'-dpng');
 
-stem([2*f,2*f2,f2-f,abs(f+f2)],[1.5,1,0.3,0.4],'LineWidth',2,'Color','Black')
+%% Online Toolbox;
+
+% this section of the code largely repeats figure 2 above but for arbitrary
+% phase, magnitude and frequency parameters
+
+clearvars -except figdir;
+% Example 1:
+t = 0.001:0.001:0.1;
+s = 0.5; % noise magnitude
+
+% let us now specify channel parameters:
+figure('Position',[64 55 1240 750]);
+% This example has multiple frequncy components:
+
+freqs = (rand(2,1)*20); % set frequency of channel components
+a = rand(1,2); % set amplitude on channel one, condition one, over both frequencies
+phi1 = rand(2,1)*2*pi; % set phase offset on channel 1, condition 1, over both frequencies
+x1 = a*cos(2*pi*freqs*t + repmat(phi1,1,length(t))); % first channel, first condition
+
+% and specify null condition on same channel:
+anull = rand(1,2); % set amplitude on channel one, null condition, over both frequencies
+phi1_null = rand(2,1)*2*pi; % set phase offset on channel 1, null condition, over both frequencies
+xnull = anull*cos(2*pi*freqs*t + repmat(phi1_null,1,length(t))); % first channel, second condition
+
+s = 0.5; % set standard deviation
+Sig = s.^2*eye(2); % set channel covariance matrix
+
+subplot(3,4,3);
+shadedErrorBar(t,x1,s*ones(length(t),1),{'LineWidth',2,'Color','Blue'},0.7);hold on;
+shadedErrorBar(t,xnull,s*ones(length(t),1),{'LineWidth',2,'Color','Black'},0.7);
+ylim([-2,2]);
+axis square;
+grid minor;
+plot4paper('Time (sec)','Magnitude');
+
+% and plot in Fourier Domain:
+subplot(3,4,4);
+stem(freqs,[a],'LineWidth',2,'Color','Blue'); hold on;
+stem(freqs,anull,'LineWidth',2,'Color','Black')
 xlim([0,40.5]);
 ylim([0,2]);
 axis square;
 grid minor;
 plot4paper('Freq (Hz)','PSD');
-print([figdir,'Fig2_InfoSpectrum'],'-dpng');
+
+
+
+% now, let us simulate a second channel for the same two conditions and
+% frequncies:
+a2 = rand(1,2); % set amplitude on channel two, condition one, over both frequencies
+phi2 = rand(2,1)*2*pi;[-pi/2;-pi/2]; % set phase offset on channel 2, condition 1, over both frequencies
+x2 = a2 * cos(2*pi*freqs*t + repmat(phi2,1,length(t))); % second channel, first condition
+
+anull_2 = rand(1,2); % set amplitude on channel two, null condition, over both frequencies
+phi2_null = rand(2,1)*2*pi; % set phase offset on channel two, null condition, over both frequencies
+xnull_2 = anull_2*cos(2*pi*freqs*t + repmat(phi2_null,1,length(t))); % data for second channel, second condition
+
+% plot these signals:
+subplot(3,4,7);
+shadedErrorBar(t,x2,s*ones(length(t),1),{'LineWidth',2,'Color','Blue'},0.7);hold on;
+shadedErrorBar(t,xnull_2,s*ones(length(t),1),{'LineWidth',2,'Color','Black'},0.7);
+ylim([-2,2]);
+axis square;
+grid minor;
+plot4paper('Time (sec)','Magnitude');
+
+% and plot in Fourier Domain:
+subplot(3,4,8);
+stem(freqs,a2,'LineWidth',2,'Color','Blue');hold on;
+stem(freqs,anull_2,'LineWidth',2,'Color','Black')
+xlim([0,40.5]);
+ylim([0,2]);
+axis square;
+grid minor;
+plot4paper('Freq (Hz)','PSD');
+
+
+% now plot experimentally computed alpha term (this is a sanity check, we compute it
+% analytically below):
+subplot(3,4,11);
+Sigma = Sig + Sig; % broadband noise: sum over frequency bands
+for i=1:length(t)
+    alphaterm(i) = 2*[(x1(i)-xnull(i))/2;(x2(i)-xnull_2(i))/2]'*inv(Sigma)*[(x1(i)-xnull(i))/2;(x2(i)-xnull_2(i))/2];
+end
+
+plot(t,alphaterm,'LineWidth',2,'Color','Black');
+
+% now convert these to the variable names in the paper to obtain analytical frequency spectra:
+for ifreq=1:2
+    temp1 = [a(ifreq),a2(ifreq)];
+    temp2 = [anull(ifreq),anull_2(ifreq)];
+    temp3 = [phi1(ifreq),phi2(ifreq)];
+    temp4 = [phi1_null(ifreq),phi2_null(ifreq)];
+    A_omega{ifreq} = 0.5*diag(sqrt(temp1.^2+temp2.^2 + ...
+        2*temp1.*temp2.*cos(temp3 - temp4 + [-pi,-pi])));
+    mu_omega{ifreq} = 0.5*diag(sqrt(temp1.^2+temp2.^2 + ...
+        2*temp1.*temp2.*cos(temp3 - temp4)));
+    Phi_omega{ifreq} = atan2(temp1.*sin(temp3) + temp2.*sin(temp4 + pi),temp1.*cos(temp3) + temp2.*cos(temp4 + pi))';
+    Phi_mean{ifreq} = -pi/2 + atan2(temp1.*sin(temp3 + pi/2) + temp2.*sin(temp4 + pi/2),temp1.*cos(temp3 + pi/2) + temp2.*cos(temp4 + pi/2))';
+    
+end
+
+% find the information content terms:
+c_b = 0;
+for ifreq=1:2
+    c_b = c_b + trace(A_omega{ifreq}*inv(Sigma)*A_omega{ifreq}*cos(Phi_omega{ifreq} - Phi_omega{ifreq}')); % equal to above expression
+    temp1 = trace(A_omega{ifreq}*inv(Sigma)*A_omega{ifreq}*cos(Phi_omega{ifreq} + Phi_omega{ifreq}'));
+    temp2 = trace(A_omega{ifreq}*inv(Sigma)*A_omega{ifreq}*sin(Phi_omega{ifreq} + Phi_omega{ifreq}'))
+    r_b(ifreq) = sqrt(temp1.^2 + temp2.^2)
+    psi(ifreq) = atan2(temp2,temp1);
+end
+
+% and cross-frequency components:
+ifreq1 = 1; ifreq2 = 2;
+
+temp1 = trace(A_omega{ifreq1}*inv(Sigma)*A_omega{ifreq2}*cos(Phi_omega{ifreq1} + Phi_omega{ifreq2}'));
+temp2 = trace(A_omega{ifreq1}*inv(Sigma)*A_omega{ifreq2}*sin(Phi_omega{ifreq1} + Phi_omega{ifreq2}'));
+r_b(3) = 2*sqrt(temp1.^2 + temp2.^2);
+psi(3) = atan2(temp2,temp1);
+
+
+temp1 = trace(A_omega{ifreq1}*inv(Sigma)*A_omega{ifreq2}*cos(Phi_omega{ifreq1} - Phi_omega{ifreq2}'));
+temp2 = trace(A_omega{ifreq1}*inv(Sigma)*A_omega{ifreq2}*sin(Phi_omega{ifreq2} - Phi_omega{ifreq1}'))
+r_b(4) = 2*sqrt(temp1.^2 + temp2.^2);
+psi(4) = atan2(temp2,temp1);
+
+%sanity check:
+infotermest = c_b;
+freqs_all = [2*freqs;sum(freqs);diff(freqs)];
+for ifreq=1:4
+    infotermest = infotermest + r_b(ifreq)*cos(2*pi*freqs_all(ifreq)*t + psi(ifreq));
+    
+end
+
+
+%sanity check both are the same (this line should be identical to the one already plotted):
+hold on;
+plot(t,infotermest,'LineWidth',2,'Color','Red');
+xlim([0,max(t)]);
+axis square;
+grid minor;
+plot4paper('Time (sec)','f^{-1}(I_{X,Y})');
+
+
+subplot(3,4,12);
+stem(abs(freqs_all),r_b,'LineWidth',2,'Color','Black');
+xlim([0,40.5]);
+axis square;
+grid minor;
+plot4paper('Freq (Hz)','PSD');
 
 
 %% Figure 3: Representational Aliasing
