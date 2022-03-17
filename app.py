@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 @author: MWJ van Es, 2022
+inspired by M. Fabus (https://gitlab.com/marcoFabus/fabus2022_harmonics/-/blob/main/app.py)
 """
 
 import numpy as np
@@ -18,7 +19,7 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 
 
-def card(header, name, props, traffic_light=''):
+def card_amp(header, name, props):
     card_content = [
         dbc.CardBody(
             [
@@ -72,7 +73,59 @@ def card(header, name, props, traffic_light=''):
                                                     id=name[2],
                                                     min=props[0],
                                                     max=props[1],
-                                                    value=props[2][2],
+                                                    value=props[2][3],
+                                                    step=props[3],
+                                                    marks=props[4],
+                                                ), ])
+
+                                    ],
+                                    width=8)
+                            ])
+                    ]
+                )
+            ]
+        )
+    ]
+
+    return card_content
+
+def card_freq(header, name, props):
+    card_content = [
+        dbc.CardBody(
+            [
+                html.H4(header, className="card-title", id=header),
+                html.Div(
+                    style={'width': '90%'},
+                    children=[
+
+                        dbc.Row(
+                            [
+
+                                dbc.Col(
+                                    html.Div(
+                                        children=[html.P('Frequency component 1'),
+                                                  html.P('Frequency component 2')]
+                                    ),
+                                    width=4
+                                ),
+
+                                dbc.Col(
+                                    [
+                                        html.Div(
+                                            style={'padding-right': '0%', 'width': '120%'},
+                                            children=[dcc.Slider(
+                                                id=name[0],
+                                                min=props[0],
+                                                max=props[1],
+                                                value=props[2][0],
+                                                step=props[3],
+                                                marks=props[4],
+                                            ),
+                                                dcc.Slider(
+                                                    id=name[2],
+                                                    min=props[0],
+                                                    max=props[1],
+                                                    value=props[2][1],
                                                     step=props[3],
                                                     marks=props[4],
                                                 ), ])
@@ -89,27 +142,19 @@ def card(header, name, props, traffic_light=''):
     return card_content
 
 
-switches = dbc.Row([
-                       html.Div(
-                           [
-                               dbc.Label(""),
-                               dbc.Switch(
-                                   id="example1",
-                                   label="Example 1",
-                                   value=False,
-                               ),
-                           ]),
-                       html.Div(
-                           [
-                               dbc.Label(""),
-                               dbc.Switch(
-                                   id="example2",
-                                   label="Example 2",
-                                   value=False,
-                               ),
-                           ])
-    ])
-
+radioitems = html.Div(
+    [
+        dbc.Label("Examples"),
+        dbc.RadioItems(
+            options=[
+                {"label": "Example 1", "value":1},
+                {"label": "Example 2", "value":2},
+            ],
+            value=1,
+            id="example_button",
+        ),
+    ]
+)
 
 # %% Example plotly figure
 headers = ['Frequency (Hz)', 'Condition 1', 'Condition 2']
@@ -118,8 +163,8 @@ names = [str(i) for i in range(10)]
 marks_amp = {str(x): {'label': str(round(x, 2)), 'style': {'color': 'black'}} for x in np.linspace(0, 2, 9)}
 marks_f = {str(int(x)): {'label': str(round(x)), 'style': {'color': 'black'}} for x in np.linspace(0, 20, 5)}
 
-props_amp = [0, 1, [1, 0.2, 0], 0.05, marks_amp]
-props_f = [0, 5, [1, 2, 3], 0.5, marks_f]
+props_amp = [0, 2, [1.5, 0, 0.75, 0], 0.25, marks_amp]
+props_f = [0, 5, [10, 0], 0.5, marks_f]
 
 instructions = html.Div(
     [
@@ -130,31 +175,15 @@ instructions = html.Div(
                 dbc.ModalBody(
                     html.Div([
                         html.A("Accompanying publication",
-                               href='https://www.biorxiv.org/content/10.1101/2021.12.21.473676v1', target="_blank"),
+                               href='https://doi.org/10.1101/2022.02.07.479399', target="_blank"),
                         html.H5(""),
                         html.P(
-                            "This simulator generates non-sinusoidal waveforms from\
-                    three user-defined sinusoids. The user can control the \
-                    amplitude, frequency, and phase of each sinusoid \
-                    by the corresponsing slider. The output graphs show \
-                    the waveform, its instantaneous frequency, and its spectrum."),
+                            "Paragraph\
+                            One "),
                         html.H5(" "),
                         html.P("\
-                    The 'Harmonic conditions met' traffic light shows whether\
-                    the resulting waveform should (green) or should not (red) be considered a harmonic\
-                    structure according to 2 conditions from Fabus et al. (2022).\
-                    These conditions are (1) integer frequency ratios and constant phase\
-                    and (2) non-negative instantaneous frequency. The user is\
-                    encouraged to explore how clear secondary oscillatory\
-                    dynamics is present when these are not met."),
-                        html.H5(" "),
-                        html.P("\
-                    Additionally, in 'Advanced mode', each condition gets\
-                    its own traffic light and the user can see which of \
-                    amplitude, frequency, and phase is driving the results.\
-                    A 1/f^gamma fit is also added to the spectrum, so\
-                    the user can explore differences between strong (gamma>2)\
-                    and weak (gamma<=2) harmonics."),
+                    Paragraph \
+                    Two"),
                     ])),
             ],
             id="modal-fs",
@@ -173,34 +202,20 @@ app.layout = html.Div(
 
         dbc.Row(
             [
-                dbc.Col(dbc.Card(card(headers[0], names[:2], props_f), style={"width": "20vw"},
+                dbc.Col(dbc.Card(card_freq(headers[0], names[:2], props_f), style={"width": "20vw"},
                                  color="light", inverse=False),
                         width=3, id='amp-col'),
-                dbc.Col(dbc.Card(card(headers[1], names[2:5], props_amp), style={"width": "20vw"}, color="light",
+                dbc.Col(dbc.Card(card_amp(headers[1], names[2:5], props_amp), style={"width": "20vw"}, color="light",
                                  inverse=False),
                         width=3),
-                dbc.Col(dbc.Card(card(headers[2], names[5:8], props_amp), style={"width": "20vw"}, color="light",
+                dbc.Col(dbc.Card(card_amp(headers[2], names[5:8], props_amp), style={"width": "20vw"}, color="light",
                                  inverse=False),
                         width=3),
-                dbc.Col(children=[instructions, switches])
+                dbc.Col(children=[instructions, radioitems])
             ],
         ),
 
-        dbc.Row(
-            [
-                dbc.Col(
-                    [
-                        dbc.Row(dcc.Graph(id='graph-sig', style={'width': '60vw', 'height': '35vh'})),
-                        dbc.Row(dcc.Graph(id='graph-if', style={'width': '60vw', 'height': '35vh'})),
-                    ]
-                ),
-                dbc.Col(
-                    [
-                        dbc.Row([dcc.Graph(id='graph-fft', style={'width': '35vw', 'height': '70vh'})])
-                    ]
-                )
-            ]
-        )
+        dbc.Row([dcc.Graph(id='graph', style={'width': '60vw', 'height': '70vh'})])
     ]
 )
 
@@ -217,13 +232,10 @@ def toggle_modal(n, is_open):
 
 
 @app.callback(
-    [Output('graph-sig', 'figure'),
-     Output('graph-if', 'figure'),
-     Output('graph-fft', 'figure'),
+    [Output('graph', 'figure'),
      Output(headers[0], 'children'),
      Output(headers[1], 'children'),
      Output(headers[2], 'children')],
-    [Input(component_id='advanced-switch', component_property='value')] +
     [Input(x, 'value') for x in names], )
 def update_figure(f1=10, f2=0, s1ch1f1=1.5, s1ch1f2=0, s1ch2f1=0.75, s1ch2f2=0, s2ch1f1=0, s2ch1f2=0, s2ch2f1=0,
                   s2ch2f2=0, example=1):
