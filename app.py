@@ -116,7 +116,7 @@ def card_freq(header, name, props):
                                                 marks=props[4],
                                             ),
                                                 dcc.Slider(
-                                                    id=name[2],
+                                                    id=name[1],
                                                     min=props[0],
                                                     max=props[1],
                                                     value=props[2][1],
