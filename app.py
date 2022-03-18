@@ -5,16 +5,10 @@
 inspired by M. Fabus (https://gitlab.com/marcoFabus/fabus2022_harmonics/-/blob/main/app.py)
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
 import dash
 from dash.dependencies import Input, Output, State
-import plotly.express as px
-import pandas as pd
-import emd
 import numpy as np
-from scipy.fft import fft, fftfreq
-from scipy import stats
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 
@@ -202,19 +196,15 @@ app.layout = html.Div(
 
         dbc.Row(
             [
-                dbc.Col(dbc.Card(card_freq(headers[0], names[:2], props_f), style={"width": "20vw"},
-                                 color="light", inverse=False),
-                        width=3, id='amp-col'),
+                dbc.Col(dbc.Card(card_freq(headers[0], names[:2], props_f), style={"width": "20vw"}, color="light",
+                                 inverse=False), width=3),
                 dbc.Col(dbc.Card(card_amp(headers[1], names[2:5], props_amp), style={"width": "20vw"}, color="light",
-                                 inverse=False),
-                        width=3),
+                                 inverse=False), width=3),
                 dbc.Col(dbc.Card(card_amp(headers[2], names[5:8], props_amp), style={"width": "20vw"}, color="light",
-                                 inverse=False),
-                        width=3),
+                                 inverse=False), width=3),
                 dbc.Col(children=[instructions, radioitems])
             ],
         ),
-
         dbc.Row([dcc.Graph(id='graph', style={'width': '60vw', 'height': '70vh'})])
     ]
 )
@@ -431,4 +421,4 @@ def update_figure(f1=10, f2=0, s1ch1f1=1.5, s1ch1f2=0, s1ch2f1=0.75, s1ch2f2=0, 
 
 
 if __name__ == '__main__':
-    app.run_server(host='127.0.0.1', debug=True)
+    app.run_server(host= '127.0.0.1', debug=True)
