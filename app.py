@@ -421,4 +421,4 @@ def update_figure(f1=10, f2=0, s1ch1f1=1.5, s1ch1f2=0, s1ch2f1=0.75, s1ch2f2=0, 
 
 
 if __name__ == '__main__':
-    app.run_server(host= '127.0.0.1', debug=True)
+    app.run_server(host= '0.0.0.0', debug=True)
