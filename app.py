@@ -222,8 +222,8 @@ def toggle_modal(n, is_open):
 
 
 @app.callback(
-    [Output('graph', 'figure'),
-    [Input(x, 'value') for x in names], )
+    [Output('graph', 'figure')],
+    [Input(x, 'value') for x in names],)
 def update_figure(f1=10, f2=0, s1ch1f1=1.5, s1ch1f2=0, s1ch2f1=0.75, s1ch2f2=0, s2ch1f1=0, s2ch1f2=0, s2ch2f1=0,
                   s2ch2f2=0, example=1):
     # define standard parameters
