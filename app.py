@@ -64,7 +64,7 @@ def card_amp(header, name, props):
                                                     marks=props[4],
                                                 ),
                                                 dcc.Slider(
-                                                    id=name[2],
+                                                    id=name[3],
                                                     min=props[0],
                                                     max=props[1],
                                                     value=props[2][3],
@@ -198,9 +198,9 @@ app.layout = html.Div(
             [
                 dbc.Col(dbc.Card(card_freq(headers[0], names[:2], props_f), style={"width": "20vw"}, color="light",
                                  inverse=False), width=3),
-                dbc.Col(dbc.Card(card_amp(headers[1], names[2:5], props_amp), style={"width": "20vw"}, color="light",
+                dbc.Col(dbc.Card(card_amp(headers[1], names[2:6], props_amp), style={"width": "20vw"}, color="light",
                                  inverse=False), width=3),
-                dbc.Col(dbc.Card(card_amp(headers[2], names[5:8], props_amp), style={"width": "20vw"}, color="light",
+                dbc.Col(dbc.Card(card_amp(headers[2], names[6:10], props_amp), style={"width": "20vw"}, color="light",
                                  inverse=False), width=3),
                 dbc.Col(children=[instructions, radioitems])
             ],
