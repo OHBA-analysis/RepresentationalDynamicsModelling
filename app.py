@@ -417,7 +417,7 @@ def update_figure(f1=10, f2=0, s1ch1f1=1.5, s1ch1f2=0, s1ch2f1=0.75, s1ch2f2=0, 
         plt.ylabel('PSD')
         plt.show()
 
-    return fig
+    return [fig]
 
 
 if __name__ == '__main__':
