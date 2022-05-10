@@ -5,7 +5,10 @@
 inspired by M. Fabus (https://gitlab.com/marcoFabus/fabus2022_harmonics/-/blob/main/app.py)
 """
 
+import plotly
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
 import dash
 from dash.dependencies import Input, Output, State
 import numpy as np
@@ -83,6 +86,7 @@ def card_amp(header, name, props):
 
     return card_content
 
+
 def card_freq(header, name, props):
     card_content = [
         dbc.CardBody(
@@ -141,8 +145,8 @@ radioitems = html.Div(
         dbc.Label("Examples"),
         dbc.RadioItems(
             options=[
-                {"label": "Example 1", "value":1},
-                {"label": "Example 2", "value":2},
+                {"label": "Example 1", "value": 1},
+                {"label": "Example 2", "value": 2},
             ],
             value=1,
             id="example_button",
@@ -223,7 +227,9 @@ def toggle_modal(n, is_open):
 
 @app.callback(
     [Output('graph', 'figure')],
-    [Input(x, 'value') for x in names],)
+    # Output('example_button', component_property='value')],
+    [Input(x, 'value') for x in names] +
+    [Input(component_id='example_button', component_property='value')], )
 def update_figure(f1=10, f2=0, s1ch1f1=1.5, s1ch1f2=0, s1ch2f1=0.75, s1ch2f2=0, s2ch1f1=0, s2ch1f2=0, s2ch2f1=0,
                   s2ch2f2=0, example=1):
     # define standard parameters
@@ -272,6 +278,7 @@ def update_figure(f1=10, f2=0, s1ch1f1=1.5, s1ch1f2=0, s1ch2f1=0.75, s1ch2f2=0, 
         ylim1 = (0, 1.5)
         ylim2 = (0, 0.5)
 
+    example = int(0)
     theta = np.array([[-np.pi / 2, -np.pi / 2], [-np.pi / 2, -np.pi / 2]])
     theta0 = theta
     s = np.array([0.5, 0.5])  # noise for channel 1 and channel 2
@@ -351,44 +358,45 @@ def update_figure(f1=10, f2=0, s1ch1f1=1.5, s1ch1f2=0, s1ch2f1=0.75, s1ch2f2=0, 
     ticks_freq = np.linspace(0, 40, 3)
 
     if not np.logical_or(example == 1, example == 2):
-        ticks_amp = np.linspace(np.floor(np.min((np.min(xa[0]) - s[0], np.min(xa[1]) - s[1]))),
-                                np.ceil(np.max((np.max(xa[0]) + s[0], np.max(xa[1]) + s[1]))),
-                                np.diff((np.floor(np.min((np.min(xa[0]) - s[0], np.min(xa[1]) - s[1]))),
-                                         np.ceil(np.max((np.max(xa[0]) + s[0], np.max(xa[1]) + s[1])))))[0] + 1)
-        ticks_pow = np.linspace(0, np.max((np.max(a), np.max(a0))), 2 * np.max((np.max(a), np.max(a0))) + 1)
-        ticks_mi = np.linspace(0, np.ceil(np.max(infotermest)), 2 * np.ceil(np.max(infotermest)) + 1)
-        ticks_mipow = np.linspace(0, np.ceil(np.max(r_b)), 2 * np.ceil(np.max(r_b)) + 1)
+        ticks_amp = np.linspace(int(np.floor(np.min((np.min(xa[0]) - s[0], np.min(xa[1]) - s[1])))),
+                                int(np.ceil(np.max((np.max(xa[0]) + s[0], np.max(xa[1]) + s[1])))),
+                                int(np.diff((np.floor(np.min((np.min(xa[0]) - s[0], np.min(xa[1]) - s[1]))),
+                                             np.ceil(np.max((np.max(xa[0]) + s[0], np.max(xa[1]) + s[1])))))[0] + 1))
+        ticks_pow = np.linspace(0, np.max((np.max(a), np.max(a0))), int(2 * np.max((np.max(a), np.max(a0))) + 1))
+        ticks_mi = np.linspace(0, np.ceil(np.max(infotermest)), int(2 * np.ceil(np.max(infotermest)) + 1))
+        ticks_mipow = np.linspace(0, np.ceil(np.max(r_b)), int(2 * np.ceil(np.max(r_b)) + 1))
         ylim1 = (0, np.ceil(np.max(infotermest)))
         ylim2 = (0, np.ceil(np.max(r_b)))
 
     # %% Plot everything
-    fig = plt.figure()
+    fig, ax = plt.subplots(3, 2)
     for k in range(3):
-        ax1 = fig.add_subplot(3, 2, 2 * (k + 1) - 1)
+        plt.sca(ax[k, 0])
         if k < 2:
             plt.plot(t, x0[k], 'k', linewidth=2)
             plt.fill_between(t, x0[k] - s[k], x0[k] + s[k], facecolor='gray', alpha=0.3)
             plt.plot(t, xa[k], 'b', linewidth=2)
             plt.fill_between(t, xa[k] - s[k], xa[k] + s[k], facecolor='b', alpha=0.3)
-            ax1.set_box_aspect(1)
-            ax1.set_yticks(np.linspace(-np.ceil(np.max(xa[k] + s[k])), np.ceil(np.max(xa[k] + s[k])), 21), minor=True)
-            ax1.set_xticks(ticks_time)
-            ax1.set_yticks(np.linspace(-np.ceil(np.max(xa[k] + s[k])), np.ceil(np.max(xa[k] + s[k])), 5))
-            ax1.tick_params(which='minor', bottom=False, left=False)
+            ax[k, 0].set_box_aspect(1)
+            ax[k, 0].set_yticks(np.linspace(-np.ceil(np.max(xa[k] + s[k])), np.ceil(np.max(xa[k] + s[k])), 21),
+                                minor=True)
+            ax[k, 0].set_xticks(ticks_time)
+            ax[k, 0].set_yticks(np.linspace(-np.ceil(np.max(xa[k] + s[k])), np.ceil(np.max(xa[k] + s[k])), 5))
+            ax[k, 0].tick_params(which='minor', bottom=False, left=False)
             plt.ylabel('Magnitude')
             plt.ylim((-2, 2))
         else:
             plt.plot(t, np.squeeze(infotermest), linewidth=2, color='k')
             plt.xlim((0, np.max(t)))
-            ax1.set_box_aspect(1)
-            ax1.set_xticks(ticks_time)
-            ax1.set_yticks(ticks_mi)
-            ax1.tick_params(which='minor', bottom=False, left=False)
+            ax[k, 0].set_box_aspect(1)
+            ax[k, 0].set_xticks(ticks_time)
+            ax[k, 0].set_yticks(ticks_mi)
+            ax[k, 0].tick_params(which='minor', bottom=False, left=False)
             plt.ylabel('f^-1 (I(X,Y))')
             plt.ylim(ylim1)
 
         plt.xlabel('Time')
-        ax2 = fig.add_subplot(3, 2, 2 * (k + 1))
+        plt.sca(ax[k, 1])
         if k < 2:
             if np.any(a0[k, :] > 0):
                 markerline, stemlines, baseline = plt.stem(
@@ -399,23 +407,22 @@ def update_figure(f1=10, f2=0, s1ch1f1=1.5, s1ch1f2=0, s1ch2f1=0.75, s1ch2f2=0, 
                     f[a[k, :] > 0], a[k, a[k, :] > 0], linefmt='b', markerfmt='bo', basefmt='w')
                 markerline.set_markerfacecolor('none')
             plt.ylim(ylim0)
-            ax2.set_box_aspect(1)
-            ax2.set_yticks(ticks_pow)
+            ax[k, 1].set_box_aspect(1)
+            ax[k, 1].set_yticks(ticks_pow)
         else:
             markerline, stemlines, baseline = plt.stem(
                 freqs_all[r_b > 0], r_b[r_b > 0], linefmt='k', markerfmt='ko', basefmt='w')
-            ax2.set_box_aspect(1)
-            ax2.set_yticks(ticks_mipow)
+            ax[k, 1].set_box_aspect(1)
+            ax[k, 1].set_yticks(ticks_mipow)
             plt.ylim(ylim2)
             markerline.set_markerfacecolor('none')
-        ax2.set_xticks(ticks_freq)
-        ax2.tick_params(which='minor', bottom=False, left=False)
+        ax[k, 1].set_xticks(ticks_freq)
+        ax[k, 1].tick_params(which='minor', bottom=False, left=False)
         plt.xlabel('Frequency (Hz)')
         plt.ylabel('PSD')
-        plt.show()
 
     return [fig]
 
 
 if __name__ == '__main__':
-    app.run_server(host= '0.0.0.0', debug=True)
+    app.run_server(host='0.0.0.0', debug=True)
