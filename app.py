@@ -343,6 +343,7 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
 
     # and cross-frequency components:
     posmin = [1, -1]
+    A_omega = np.matmul(np.diag(f>0), A_omega)
     for i in np.arange(2):
         temp1 = np.trace(np.matmul(np.matmul(A_omega[0], np.linalg.inv(Sigma)),
                                    A_omega[1] * np.cos(np.expand_dims(phi_omega[0], 1) + posmin[i] * phi_omega[1])))
