@@ -228,7 +228,7 @@ def toggle_modal(n, is_open):
      Output('9', component_property='value')],
     [Input(component_id='example_button', component_property='value')] +
     [Input(x, 'value') for x in names], )
-#def update_figure(example, f1=10, f2=0, s1ch1f1=1.5, s1ch1f2=0, s1ch2f1=0.75, s1ch2f2=0, s2ch1f1=0, s2ch1f2=0, s2ch2f1=0,
+# def update_figure(example, f1=10, f2=0, s1ch1f1=1.5, s1ch1f2=0, s1ch2f1=0.75, s1ch2f2=0, s2ch1f1=0, s2ch1f2=0, s2ch2f1=0,
 #                  s2ch2f2=0):
 def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, s2ch1f2, s2ch2f1,
                   s2ch2f2):
@@ -281,10 +281,6 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
 
         ylim1 = (0, 1.6)
         ylim2 = (0, 0.5)
-
-
-
-
 
     theta = np.array([[-np.pi / 2, -np.pi / 2], [-np.pi / 2, -np.pi / 2]])
     theta0 = theta
@@ -376,11 +372,13 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
         ylim2 = (0, np.ceil(np.max(r_b)))
 
     example = 0
+
     # %% Plot everything
     import plotly.graph_objs as go
     from plotly.subplots import make_subplots
     fig = make_subplots(rows=3, cols=2,
                         subplot_titles=("Stimulus Evoked Signals", "Power", "", "", "Information Content", ""))
+    # left side of the figure
     for k in range(3):
         if k < 2:
             fig.add_trace(
@@ -453,47 +451,50 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
         # right side of the figure
         if k < 2:
             for i in np.where(a0[k, :] > 0)[0]:
-                fig.add_trace(
-                    go.Scatter(
-                        x=[f[i], f[i]],
-                        y=[-1, a0[k, i]],
-                        mode='lines+markers',
-                        line=dict(color='black', width=3),
-                        marker=dict(size=10, color='black', symbol='circle'),
-                        showlegend=False
-                    ),
-                    row=k + 1,
-                    col=2
-                )
+                if f[i] > 0:
+                    fig.add_trace(
+                        go.Scatter(
+                            x=[f[i], f[i]],
+                            y=[-1, a0[k, i]],
+                            mode='lines+markers',
+                            line=dict(color='black', width=3),
+                            marker=dict(size=10, color='black', symbol='circle'),
+                            showlegend=False
+                        ),
+                        row=k + 1,
+                        col=2
+                    )
             for i in np.where(a[k, :] > 0)[0]:
-                fig.add_trace(
-                    go.Scatter(
-                        x=[f[i], f[i]],
-                        y=[-1, a[k, i]],
-                        mode='lines+markers',
-                        line=dict(color='blue', width=3),
-                        marker=dict(size=10, color='blue', symbol='circle'),
-                        showlegend=False
-                    ),
-                    row=k + 1,
-                    col=2
-                )
+                if f[i] > 0:
+                    fig.add_trace(
+                        go.Scatter(
+                            x=[f[i], f[i]],
+                            y=[-1, a[k, i]],
+                            mode='lines+markers',
+                            line=dict(color='blue', width=3),
+                            marker=dict(size=10, color='blue', symbol='circle'),
+                            showlegend=False
+                        ),
+                        row=k + 1,
+                        col=2
+                    )
             fig.update_yaxes(dict(title_text=f"PSD"), range=ylim0, row=k + 1, col=2)
             fig.update_xaxes(range=[0, 40], row=k + 1, col=2)
         else:
             for i in np.where(r_b > 0)[0]:
-                fig.add_trace(
-                    go.Scatter(
-                        x=[freqs_all[i], freqs_all[i]],
-                        y=[-1, r_b[i]],
-                        mode='lines+markers',
-                        line=dict(color='black', width=3),
-                        marker=dict(size=10, color='black', symbol='circle'),
-                        showlegend=False
-                    ),
-                    row=k + 1,
-                    col=2
-                )
+                if freqs_all[i] > 0:
+                    fig.add_trace(
+                        go.Scatter(
+                            x=[freqs_all[i], freqs_all[i]],
+                            y=[-1, r_b[i]],
+                            mode='lines+markers',
+                            line=dict(color='black', width=3),
+                            marker=dict(size=10, color='black', symbol='circle'),
+                            showlegend=False
+                        ),
+                        row=k + 1,
+                        col=2
+                    )
                 fig.update_xaxes(dict(title_text="Frequency (Hz)"), range=[0, 40], row=k + 1, col=2)
                 fig.update_yaxes(dict(title_text="PSD"), range=ylim2, row=k + 1, col=2)
 
