@@ -166,11 +166,10 @@ instructions = html.Div(
                             frequencies and the amplitudes in each condition and channel \
                             can be changed using the sliders. Example 1/2 can be toggled to\
                             see the examples corresponding to figure 2 in Higgins et al (2022).\
-                            \
                             We can see that when we use instantaneous signal decoding, the\
-                            information content oscillates with twice the original frequency. \
-                            \
-                            \
+                            information content oscillates with twice the original frequency."),
+                        html.H5(" "),
+                        html.P("\
                             App created by Mats W.J. van Es, 2022"),
                     ])),
             ],
