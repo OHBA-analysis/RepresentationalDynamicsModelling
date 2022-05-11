@@ -5,12 +5,8 @@
 inspired by M. Fabus (https://gitlab.com/marcoFabus/fabus2022_harmonics/-/blob/main/app.py)
 """
 
-import plotly
-from plotly.subplots import make_subplots
 import plotly.graph_objs as go
-
-import plotly.express as px
-import matplotlib.pyplot as plt
+from plotly.subplots import make_subplots
 import dash
 from dash.dependencies import Input, Output, State
 import numpy as np
@@ -228,14 +224,9 @@ def toggle_modal(n, is_open):
      Output('9', component_property='value')],
     [Input(component_id='example_button', component_property='value')] +
     [Input(x, 'value') for x in names], )
-# def update_figure(example, f1=10, f2=0, s1ch1f1=1.5, s1ch1f2=0, s1ch2f1=0.75, s1ch2f2=0, s2ch1f1=0, s2ch1f2=0, s2ch2f1=0,
-#                  s2ch2f2=0):
+
 def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, s2ch1f2, s2ch2f1,
                   s2ch2f2):
-    params_example1 = np.array((10, 0, 1.5, 0, 0.75, 0, 0, 0, 0, 0))
-    params_example2 = np.array((10, 15, 0.5, 0.77, 0.25, 1.5, 0.09, 0.54, 0.09, 0.54))
-    params = np.array((f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, s2ch1f2, s2ch2f1, s2ch2f2))
-
     # define standard parameters
     t = np.arange(0.001, 0.101, 0.001)
     if example == 1:
@@ -374,8 +365,6 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
     example = 0
 
     # %% Plot everything
-    import plotly.graph_objs as go
-    from plotly.subplots import make_subplots
     fig = make_subplots(rows=3, cols=2,
                         subplot_titles=("Stimulus Evoked Signals", "Power", "", "", "Information Content", ""))
     # left side of the figure
