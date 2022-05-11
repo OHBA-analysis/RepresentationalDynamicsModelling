@@ -155,12 +155,23 @@ instructions = html.Div(
                                href='https://doi.org/10.1101/2022.02.07.479399', target="_blank"),
                         html.H5(""),
                         html.P(
-                            "Paragraph\
-                            One "),
+                            "In this simulator we illustrate the relationship between\
+                            the frequency content of a (neural) signal and the subsequent\
+                            decoding accuracy metrics when we use instantaneous signal\
+                            decoding."),
                         html.H5(" "),
                         html.P("\
-                    Paragraph \
-                    Two"),
+                            We simulate two conditions across two channels, each of which \
+                            are made up out of a maximum two frequency components. The  \
+                            frequencies and the amplitudes in each condition and channel \
+                            can be changed using the sliders. Example 1/2 can be toggled to\
+                            see the examples corresponding to figure 2 in Higgins et al (2022).\
+                            \
+                            We can see that when we use instantaneous signal decoding, the\
+                            information content oscillates with twice the original frequency. \
+                            \
+                            \
+                            App created by Mats W.J. van Es, 2022"),
                     ])),
             ],
             id="modal-fs",
