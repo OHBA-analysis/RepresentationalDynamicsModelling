@@ -172,6 +172,7 @@ instructions = html.Div(
 )
 
 app = dash.Dash(__name__, title='RepresentationalDynamics', external_stylesheets=[dbc.themes.BOOTSTRAP])
+server=app.server
 app.layout = html.Div(
     [
         dcc.Location(id='url', refresh=False),
