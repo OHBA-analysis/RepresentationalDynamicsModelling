@@ -35,12 +35,12 @@ def card_amp(header, name, props):
                                             children=[
                                                 html.P('Channel 1, Amplitude component 1'),
                                                 dcc.Slider(
-                                                id=name[0],
-                                                min=props[0],
-                                                max=props[1],
-                                                value=props[2][0],
-                                                step=props[3],
-                                            ),
+                                                    id=name[0],
+                                                    min=props[0],
+                                                    max=props[1],
+                                                    value=props[2][0],
+                                                    step=props[3],
+                                                ),
                                                 html.P('Channel 1, Amplitude component 2'),
                                                 dcc.Slider(
                                                     id=name[1],
@@ -66,7 +66,7 @@ def card_amp(header, name, props):
                                                     step=props[3],
                                                 ), ])
                                     ],
-                                    )
+                                )
                             ])
                     ]
                 )
@@ -95,12 +95,12 @@ def card_freq(header, name, props):
                                             children=[
                                                 html.P('Frequency component 1'),
                                                 dcc.Slider(
-                                                id=name[0],
-                                                min=props[0],
-                                                max=props[1],
-                                                value=props[2][0],
-                                                step=props[3],
-                                            ),
+                                                    id=name[0],
+                                                    min=props[0],
+                                                    max=props[1],
+                                                    value=props[2][0],
+                                                    step=props[3],
+                                                ),
                                                 html.P('Frequency component 2'),
                                                 dcc.Slider(
                                                     id=name[1],
@@ -111,7 +111,7 @@ def card_freq(header, name, props):
                                                 ), ])
 
                                     ],
-                                    )
+                                )
                             ])
                     ]
                 )
@@ -145,7 +145,7 @@ marks_amp = {str(x): {'label': str(round(x, 2)), 'style': {'color': 'black'}} fo
 marks_f = {str(int(x)): {'label': str(round(x)), 'style': {'color': 'black'}} for x in np.linspace(0, 20, 5)}
 
 props_amp = [0, 2, [1.5, 0, 0.75, 0], 0.25, marks_amp]
-props_f = [0, 5, [10, 0], 0.5, marks_f]
+props_f = [0, 20, [10, 0], 1, marks_f]
 
 instructions = html.Div(
     [
@@ -187,16 +187,16 @@ app.layout = html.Div(
                     dbc.Col(children=[instructions, radioitems]),
 
                     dbc.Col(dbc.Card(card_freq(headers[0], names[:2], props_f), color="light",
-                                 inverse=False)),
-                    ]),
+                                     inverse=False)),
+                ]),
                 dbc.Col(dbc.Card(card_amp(headers[1], names[2:6], props_amp), color="light",
                                  inverse=False)),
                 dbc.Col(dbc.Card(card_amp(headers[2], names[6:10], props_amp), color="light",
                                  inverse=False))
-                ], style={"width": "100vw"}),
+            ], style={"width": "100vw"}),
         dbc.Row(
             [dcc.Graph(id='graph'),
-                ],
+             ],
         ),
     ]
 )
@@ -215,11 +215,27 @@ def toggle_modal(n, is_open):
 
 @app.callback(
     [Output('graph', 'figure'),
-     Output('example_button', component_property='value')],
-    [Input(x, 'value') for x in names] +
-    [Input(component_id='example_button', component_property='value')], )
-def update_figure(f1=10, f2=0, s1ch1f1=1.5, s1ch1f2=0, s1ch2f1=0.75, s1ch2f2=0, s2ch1f1=0, s2ch1f2=0, s2ch2f1=0,
-                  s2ch2f2=0, example=1):
+     Output('example_button', component_property='value'),
+     Output('0', component_property='value'),
+     Output('1', component_property='value'),
+     Output('2', component_property='value'),
+     Output('3', component_property='value'),
+     Output('4', component_property='value'),
+     Output('5', component_property='value'),
+     Output('6', component_property='value'),
+     Output('7', component_property='value'),
+     Output('8', component_property='value'),
+     Output('9', component_property='value')],
+    [Input(component_id='example_button', component_property='value')] +
+    [Input(x, 'value') for x in names], )
+#def update_figure(example, f1=10, f2=0, s1ch1f1=1.5, s1ch1f2=0, s1ch2f1=0.75, s1ch2f2=0, s2ch1f1=0, s2ch1f2=0, s2ch2f1=0,
+#                  s2ch2f2=0):
+def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, s2ch1f2, s2ch2f1,
+                  s2ch2f2):
+    params_example1 = np.array((10, 0, 1.5, 0, 0.75, 0, 0, 0, 0, 0))
+    params_example2 = np.array((10, 15, 0.5, 0.77, 0.25, 1.5, 0.09, 0.54, 0.09, 0.54))
+    params = np.array((f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, s2ch1f2, s2ch2f1, s2ch2f2))
+
     # define standard parameters
     t = np.arange(0.001, 0.101, 0.001)
     if example == 1:
@@ -265,6 +281,10 @@ def update_figure(f1=10, f2=0, s1ch1f1=1.5, s1ch1f2=0, s1ch2f1=0.75, s1ch2f2=0, 
 
         ylim1 = (0, 1.6)
         ylim2 = (0, 0.5)
+
+
+
+
 
     theta = np.array([[-np.pi / 2, -np.pi / 2], [-np.pi / 2, -np.pi / 2]])
     theta0 = theta
@@ -355,6 +375,7 @@ def update_figure(f1=10, f2=0, s1ch1f1=1.5, s1ch1f2=0, s1ch2f1=0.75, s1ch2f2=0, 
         ylim1 = (0, np.ceil(np.max(infotermest)))
         ylim2 = (0, np.ceil(np.max(r_b)))
 
+    example = 0
     # %% Plot everything
     import plotly.graph_objs as go
     from plotly.subplots import make_subplots
@@ -475,7 +496,9 @@ def update_figure(f1=10, f2=0, s1ch1f1=1.5, s1ch1f2=0, s1ch2f1=0.75, s1ch2f2=0, 
                 )
                 fig.update_xaxes(dict(title_text="Frequency (Hz)"), range=[0, 40], row=k + 1, col=2)
                 fig.update_yaxes(dict(title_text="PSD"), range=ylim2, row=k + 1, col=2)
-    return [fig, example]
+
+    return [fig, example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, s2ch1f2, s2ch2f1, s2ch2f2]
+
 
 if __name__ == '__main__':
     app.run_server(host='0.0.0.0', debug=True)
