@@ -26,58 +26,47 @@ def card_amp(header, name, props):
                 html.Div(
                     style={'width': '100%'},
                     children=[
-
                         dbc.Row(
                             [
-
-                                dbc.Col(
-                                    html.Div(
-                                        children=[html.P('Channel 1, freq 1'),
-                                                  html.P('Channel 1, freq 2'),
-                                                  html.P('Channel 2, freq 1'),
-                                                  html.P('Channel 2, freq 2')]
-                                    ),
-                                    width=4
-                                ),
-
                                 dbc.Col(
                                     [
                                         html.Div(
                                             style={'padding-right': '0%', 'width': '100%'},
-                                            children=[dcc.Slider(
+                                            children=[
+                                                html.P('Channel 1, Amplitude component 1'),
+                                                dcc.Slider(
                                                 id=name[0],
                                                 min=props[0],
                                                 max=props[1],
                                                 value=props[2][0],
                                                 step=props[3],
-                                                marks=props[4],
                                             ),
+                                                html.P('Channel 1, Amplitude component 2'),
                                                 dcc.Slider(
                                                     id=name[1],
                                                     min=props[0],
                                                     max=props[1],
                                                     value=props[2][1],
                                                     step=props[3],
-                                                    marks=props[4]
                                                 ),
+                                                html.P('Channel 2, Amplitude component 1'),
                                                 dcc.Slider(
                                                     id=name[2],
                                                     min=props[0],
                                                     max=props[1],
                                                     value=props[2][2],
                                                     step=props[3],
-                                                    marks=props[4],
                                                 ),
+                                                html.P('Channel 2, Amplitude component 2'),
                                                 dcc.Slider(
                                                     id=name[3],
                                                     min=props[0],
                                                     max=props[1],
                                                     value=props[2][3],
                                                     step=props[3],
-                                                    marks=props[4],
                                                 ), ])
                                     ],
-                                    width=8)
+                                    )
                             ])
                     ]
                 )
@@ -99,38 +88,30 @@ def card_freq(header, name, props):
 
                         dbc.Row(
                             [
-
-                                dbc.Col(
-                                    html.Div(
-                                        children=[html.P('Frequency component 1'),
-                                                  html.P('Frequency component 2')]
-                                    ),
-                                    width=4
-                                ),
-
                                 dbc.Col(
                                     [
                                         html.Div(
                                             style={'padding-right': '0%', 'width': '100%'},
-                                            children=[dcc.Slider(
+                                            children=[
+                                                html.P('Frequency component 1'),
+                                                dcc.Slider(
                                                 id=name[0],
                                                 min=props[0],
                                                 max=props[1],
                                                 value=props[2][0],
                                                 step=props[3],
-                                                marks=props[4],
                                             ),
+                                                html.P('Frequency component 2'),
                                                 dcc.Slider(
                                                     id=name[1],
                                                     min=props[0],
                                                     max=props[1],
                                                     value=props[2][1],
                                                     step=props[3],
-                                                    marks=props[4],
                                                 ), ])
 
                                     ],
-                                    width=8)
+                                    )
                             ])
                     ]
                 )
@@ -151,6 +132,7 @@ radioitems = html.Div(
             ],
             value=1,
             id="example_button",
+            inline=True,
         ),
     ]
 )
@@ -201,16 +183,21 @@ app.layout = html.Div(
 
         dbc.Row(
             [
-                dbc.Col(dbc.Card(card_freq(headers[0], names[:2], props_f), style={"width": "20vw"}, color="light",
-                                 inverse=False), width=3),
-                dbc.Col(dbc.Card(card_amp(headers[1], names[2:6], props_amp), style={"width": "20vw"}, color="light",
-                                 inverse=False), width=3),
-                dbc.Col(dbc.Card(card_amp(headers[2], names[6:10], props_amp), style={"width": "20vw"}, color="light",
-                                 inverse=False), width=3),
-                dbc.Col(children=[instructions, radioitems])
-            ],
+                dbc.Col([
+                    dbc.Col(children=[instructions, radioitems]),
+
+                    dbc.Col(dbc.Card(card_freq(headers[0], names[:2], props_f), color="light",
+                                 inverse=False)),
+                    ]),
+                dbc.Col(dbc.Card(card_amp(headers[1], names[2:6], props_amp), color="light",
+                                 inverse=False)),
+                dbc.Col(dbc.Card(card_amp(headers[2], names[6:10], props_amp), color="light",
+                                 inverse=False))
+                ], style={"width": "100vw"}),
+        dbc.Row(
+            [dcc.Graph(id='graph'),
+                ],
         ),
-        dbc.Row([dcc.Graph(id='graph', style={'width': '60vw', 'height': '70vh'})])
     ]
 )
 
@@ -367,7 +354,6 @@ def update_figure(f1=10, f2=0, s1ch1f1=1.5, s1ch1f2=0, s1ch2f1=0.75, s1ch2f2=0, 
         ticks_mipow = np.linspace(0, np.ceil(np.max(r_b)), int(2 * np.ceil(np.max(r_b)) + 1))
         ylim1 = (0, np.ceil(np.max(infotermest)))
         ylim2 = (0, np.ceil(np.max(r_b)))
-    example = int(0)
 
     # %% Plot everything
     import plotly.graph_objs as go
