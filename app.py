@@ -141,7 +141,7 @@ marks_amp = {str(x): {'label': str(round(x, 2)), 'style': {'color': 'black'}} fo
 marks_f = {str(int(x)): {'label': str(round(x)), 'style': {'color': 'black'}} for x in np.linspace(0, 20, 5)}
 
 props_amp = [0, 2, [1.5, 0, 0.75, 0], 0.25, marks_amp]
-props_f = [0, 20, [10, 0], 1, marks_f]
+props_f = [1, 20, [10, 0], 1, marks_f]
 
 instructions = html.Div(
     [
@@ -182,7 +182,7 @@ instructions = html.Div(
 )
 
 app = dash.Dash(__name__, title='RepresentationalDynamics', external_stylesheets=[dbc.themes.BOOTSTRAP])
-server=app.server
+server = app.server
 app.layout = html.Div(
     [
         dcc.Location(id='url', refresh=False),
@@ -235,7 +235,6 @@ def toggle_modal(n, is_open):
      Output('9', component_property='value')],
     [Input(component_id='example_button', component_property='value')] +
     [Input(x, 'value') for x in names], )
-
 def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, s2ch1f2, s2ch2f1,
                   s2ch2f2):
     # define standard parameters
@@ -243,7 +242,7 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
     if example == 1:
         # frequency
         f1 = 10.0
-        f2 = 0
+        f2 = 1.5 * f1
 
         # amplitude
         s1ch1f1 = 1.5  # magnitude of signal 1, channel 1, frequency component 1
@@ -343,7 +342,6 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
 
     # and cross-frequency components:
     posmin = [1, -1]
-    A_omega = np.matmul(np.diag(f>0), A_omega)
     for i in np.arange(2):
         temp1 = np.trace(np.matmul(np.matmul(A_omega[0], np.linalg.inv(Sigma)),
                                    A_omega[1] * np.cos(np.expand_dims(phi_omega[0], 1) + posmin[i] * phi_omega[1])))
@@ -452,57 +450,53 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
         # right side of the figure
         if k < 2:
             for i in np.where(a0[k, :] > 0)[0]:
-                if f[i] > 0:
-                    fig.add_trace(
-                        go.Scatter(
-                            x=[f[i], f[i]],
-                            y=[-1, a0[k, i]],
-                            mode='lines+markers',
-                            line=dict(color='black', width=3),
-                            marker=dict(size=10, color='black', symbol='circle'),
-                            showlegend=False
-                        ),
-                        row=k + 1,
-                        col=2
-                    )
+                fig.add_trace(
+                    go.Scatter(
+                        x=[f[i], f[i]],
+                        y=[-1, a0[k, i]],
+                        mode='lines+markers',
+                        line=dict(color='black', width=3),
+                        marker=dict(size=10, color='black', symbol='circle'),
+                        showlegend=False
+                    ),
+                    row=k + 1,
+                    col=2
+                )
             for i in np.where(a[k, :] > 0)[0]:
-                if f[i] > 0:
-                    fig.add_trace(
-                        go.Scatter(
-                            x=[f[i], f[i]],
-                            y=[-1, a[k, i]],
-                            mode='lines+markers',
-                            line=dict(color='blue', width=3),
-                            marker=dict(size=10, color='blue', symbol='circle'),
-                            showlegend=False
-                        ),
-                        row=k + 1,
-                        col=2
-                    )
+                fig.add_trace(
+                    go.Scatter(
+                        x=[f[i], f[i]],
+                        y=[-1, a[k, i]],
+                        mode='lines+markers',
+                        line=dict(color='blue', width=3),
+                        marker=dict(size=10, color='blue', symbol='circle'),
+                        showlegend=False
+                    ),
+                    row=k + 1,
+                    col=2
+                )
             fig.update_yaxes(dict(title_text=f"PSD"), range=ylim0, row=k + 1, col=2)
             fig.update_xaxes(range=[0, 40], row=k + 1, col=2)
         else:
             for i in np.where(r_b > 0)[0]:
-                if freqs_all[i] > 0:
-                    fig.add_trace(
-                        go.Scatter(
-                            x=[freqs_all[i], freqs_all[i]],
-                            y=[-1, r_b[i]],
-                            mode='lines+markers',
-                            line=dict(color='black', width=3),
-                            marker=dict(size=10, color='black', symbol='circle'),
-                            showlegend=False
-                        ),
-                        row=k + 1,
-                        col=2
-                    )
-                fig.update_xaxes(dict(title_text="Frequency (Hz)"), range=[0, 40], row=k + 1, col=2)
-                fig.update_yaxes(dict(title_text="PSD"), range=ylim2, row=k + 1, col=2)
+                fig.add_trace(
+                    go.Scatter(
+                        x=[freqs_all[i], freqs_all[i]],
+                        y=[-1, r_b[i]],
+                        mode='lines+markers',
+                        line=dict(color='black', width=3),
+                        marker=dict(size=10, color='black', symbol='circle'),
+                        showlegend=False
+                    ),
+                    row=k + 1,
+                    col=2
+                )
+            fig.update_xaxes(dict(title_text="Frequency (Hz)"), range=[0, 40], row=k + 1, col=2)
+            fig.update_yaxes(dict(title_text="PSD"), range=ylim2, row=k + 1, col=2)
 
     return [fig, example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, s2ch1f2, s2ch2f1, s2ch2f2]
 
-
 if __name__ == '__main__':
-    #app.run_server(host='0.0.0.0', debug=True)
-    app.debug=True
+    # app.run_server(host='0.0.0.0', debug=True)
+    app.debug = True
     app.run()
