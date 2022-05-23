@@ -1,12 +1,34 @@
 % this script plots the results of the analysis conducted by the script
 % MEGDataAnalysis, to obtain the plots given in Higgins et al 2022.
 
+% Set directories:
+rawdatadirdir = 'F:\My Data\Cichy2014\';
+%workingdir = 'C:\Users\chiggins\Documents\Cichy2020Analysis\';
+workingdir = '/Volumes/CamsHD2/Cichy2020Analysis/'; % update for new computer
 
+Spectdatafolder = '/STFTdata/'; % this is where we save the STFT output
+figdir = '/Users/chiggins/Documents/Figures_RepDynamics'; % where the figures should be saved
 %% Figure 6A: compare instantaneous, nrrowband and complex spectrum decoding:
 DM = [true(30,1);false(30,1)];
 DM = repmat(permute(DM,[2,3,1]),7,111);
+
+
+% data parameters:
+nTr = 30;
+nCh = 306;
+ttrial = 111;
+ncond = 118;
+nF = 7;
+ncomparisons = (ncond.^2-ncond)/2;
+
+freq_bands = [nan;[0:10:50]'];
+
+t_points = -0.1:0.01:1; % epoch timings
+t_to_run = find(t_points>=0 & t_points<=0.5); % the points we will decode
+
 acc_all = nan(nF,ttrial,ncomparisons,15);
 acc_realonly = nan(nF,ttrial,ncomparisons,15);
+
 for iSj=1:15
     fprintf(['Sj=',int2str(iSj),'\n'])
     % load real part:
@@ -14,12 +36,12 @@ for iSj=1:15
     indcomp = 1;
     for icond1 = 1:ncond
         for icond2=(icond1+1):ncond
-            load([workingdir,'subj',sprintf('%02d',iSj),'\DecRes\acc_preds',sprintf('%04d',indcomp),'.mat'],'preds');
+            load([workingdir,'subj',sprintf('%02d',iSj),'/DecRes/acc_preds',sprintf('%04d',indcomp),'_stft.mat'],'preds');
             %setup data format:
             preds = cast(preds>0,'uint8');
             acc_all(:,:,indcomp,iSj) = mean(~xor(DM,preds),3);
             
-            load([workingdir,'subj',sprintf('%02d',iSj),'\DecRes\acc_preds',sprintf('%04d',indcomp),'_realonly.mat'],'preds');
+            load([workingdir,'subj',sprintf('%02d',iSj),'/DecRes/acc_preds',sprintf('%04d',indcomp),'_stft_realonly.mat'],'preds');
             preds = cast(preds>0,'uint8');
             acc_realonly(:,:,indcomp,iSj) = mean(~xor(DM,preds),3);
             indcomp = indcomp+1;
@@ -72,6 +94,87 @@ xlim([0,0.5])
 title('Complex Spectrum decoding');
 print([figdir,'Fig6A_realimag_allsj'],'-dpng');
 
+%% Supplementary analysis: comparing narrowband and instananeous decoding accuracy
+
+for i1=1:2
+    figure('Position',[440 463 336 335])
+    if i1==1
+        acc_alltime = squeeze(nanmean(temp_acc_real));
+        titlelabel = 'Narrowband Signal Decoding';
+        titlestr = 'C_Narrowband';
+    else
+        acc_alltime = squeeze(nanmean(temp_acc_all));
+        titlelabel = 'Complex Spectrum Decoding';
+        titlestr = 'D_Complex';
+    end
+    
+    % paired t tests:
+    for i=1:6
+        [~,pval(i,i1)] = ttest(acc_alltime(1+i,:),acc_alltime(1,:),'tail','right');
+    end
+    %addpath(genpath('/Users/chiggins/Google Drive/MATLAB/hmm_misc_funcs'))
+    %distributionPlot(acc_alltime,'showMM',2);
+    xaxislabels = {'Instant.','0Hz','10Hz','20Hz','30Hz','40Hz','50Hz'}';
+   
+    bh = boxplot(acc_alltime','plotstyle','compact', 'boxstyle','filled');
+    set(gca,'XTick',[1:7]);
+    set(gca,'XTickLabels',xaxislabels)
+    plot4paper('','Accuracy')
+    %set(gca,'XTickAxisFontSize',20)
+    %bh = boxplot(cycletime_hcp,grouplabs,'Notch','on', ...
+     %   'Labels',{'Sensorimotor','Cognitive'});
+%set(bh,'LineWidth', 10);
+    title(titlelabel)
+    hold on;
+    plot([0,7],[0.5 0.5],'k--')
+    ylim([0.48 0.68])
+    
+    print([figdir,'Fig6',titlestr,'_alltime'],'-dpng');
+
+    %close(gcf)
+end
+
+%% cluster permutation tests: 
+figure('Position', [7 694 1911 404]);
+for iF=2:nF
+    subplot(1,nF-1,iF-1);
+    plot(t_points,mean(temp_acc_real(:,iF,:),3),'LineWidth',2,'Color',cols(iF,:));hold on;
+    plot(t_points,mean(temp_acc_real(:,1,:),3),'LineWidth',2,'Color',cols(iF,:),'LineStyle',':');hold on;
+    
+    corrp = osl_clustertf(permute(temp_acc_real(:,iF,:) - temp_acc_real(:,1,:),[3,2,1]));
+    xlim([0,0.5])
+    axis square;
+    plot4paper('Time (sec)','Accuracy')
+    YL = ylim;
+    ylim([0.48,YL(2)]); YL = ylim;
+    title(labelsplot{iF});
+    hold on;
+    p_toplot = [corrp>0.975];
+    plot(t_points(find(p_toplot)),(YL(1)+0.035*diff(YL))*ones(sum(p_toplot),1),'LineWidth',4,'Color',[0.4660, 0.6740, 0.1880]);
+    ylim([0.48,0.66])
+end
+print([figdir,'Fig6E_real_inst_compare'],'-dpng');
+
+figure('Position', [7 694 1911 404]);
+for iF=2:nF
+    subplot(1,nF-1,iF-1);
+    plot(t_points,mean(temp_acc_all(:,iF,:),3),'LineWidth',2,'Color',cols(iF,:));hold on;
+    plot(t_points,mean(temp_acc_all(:,1,:),3),'LineWidth',2,'Color',cols(iF,:),'LineStyle',':');hold on;
+    
+    corrp = osl_clustertf(permute(temp_acc_all(:,iF,:) - temp_acc_all(:,1,:),[3,2,1]));
+    xlim([0,0.5])
+    axis square;
+    plot4paper('Time (sec)','Accuracy')
+    YL = ylim;
+    ylim([0.48,YL(2)]); YL = ylim;
+    title(labelsplot{iF});
+    hold on;
+    p_toplot = [corrp>0.975];
+    plot(t_points(find(p_toplot)),(YL(1)+0.035*diff(YL))*ones(sum(p_toplot),1),'LineWidth',4,'Color',[0.4660, 0.6740, 0.1880]);
+    ylim([0.48,0.66])
+end
+print([figdir,'Fig6F_complex_inst_compare'],'-dpng');
+
 %% FIGURE 6B: Accuracy vs time plots in each frequency band:
 
 temp_acc_all = permute(mean(acc_all,3),[2,1,4,3]);
@@ -102,7 +205,7 @@ h(2) = plot(nan,nan,'LineWidth',2,'Color',cols(1,:),'LineStyle',':');
 l = legend(h,{'Complex Spectrum','Real spectrum'})
 set(l,'Position', [0.4654 0.0095 0.1164 0.1349])
 
-print([figdir,'Fig6b_',int2str(imethod)','Accvstime_long'],'-dpng');
+print([figdir,'Fig6b_Accvstime_long'],'-dpng');
 
 %% FIGURE 6C: Example subject:
 
@@ -151,7 +254,7 @@ for iF = 3:6
     set(gca,'YTickLabel',10.^[-5:1:1]);
     plot4paper('Frequency (Hz)','PSD')
 end
-print([figdir,'Fig6C_',int2str(imethod)','_example'],'-dpng');
+print([figdir,'Fig6C_example'],'-dpng');
 
 
 % also compute the group averages:
@@ -216,12 +319,82 @@ h(1) = plot(nan,nan,'LineWidth',2,'Color',cols(1,:));
 h(2) = plot(nan,nan,'LineWidth',2,'Color',cols(1,:),'LineStyle',':');
 l = legend(h,{'Complex Spectrum','Real spectrum'})
 set(l,'Position', [0.4680 0.0282 0.1164 0.1233])
-print([figdir,'Fig6C_',int2str(imethod)','Accvsfreq_long'],'-dpng');
+print([figdir,'Fig6C_Accvsfreq_long'],'-dpng');
 h2(1) = plot(nan,nan,'r');
 h2(2) = plot(nan,nan,'r--');
 l2 = legend(h2,{'Harmonic frequency','Aliased harmonic frequency'})
 set(l2,'Position', [0.4680 0.0282 0.1164 0.1233])
-print([figdir,'Fig6C_',int2str(imethod)','Accvsfreq_long2'],'-dpng');
+print([figdir,'Fig6C_Accvsfreq_long2'],'-dpng');
+
+%% and supplementary time x frequency figure for reviewers:
+
+acc_timefreq = zeros(6,101,15);
+for iSj=1:15
+    fprintf(['Sj=',int2str(iSj),'\n'])
+    % load real part:
+    indcomp = 1;
+    acc_timefreq_sj = zeros(6,101);
+    for icond1 = 1:ncond
+        for icond2=(icond1+1):ncond
+            %acc_realonly_f(:,:,indcomp,iSj) = pwelch(acc_realonly(:,t_to_run,indcomp,iSj)'-0.5,25,20);
+            %acc_all_f(:,:,indcomp,iSj) = pwelch(acc_all(:,t_to_run,indcomp,iSj)'-0.5,25,20);
+            temp_spect = spectrogram(acc_all(1,:,indcomp,iSj)'-0.5,11,10,[0:10:50],100);
+            acc_timefreq_sj = acc_timefreq_sj + log10(abs(temp_spect));
+            indcomp = indcomp+1;
+        end
+    end
+    acc_timefreq(:,:,iSj) = acc_timefreq_sj;
+end
+
+for iSj = 1:15
+    flag = isinf(acc_timefreq(1,2:end-1,iSj));
+    flag = find(flag)+1;
+    if ~isempty(flag)
+        for i = flag
+            acc_timefreq(1,i,iSj) = 0.5*acc_timefreq(1,i-1,iSj) + 0.5*acc_timefreq(1,i+1,iSj);
+        end
+    end
+end
+%%
+
+figure('Position',[276 609 724 189]);
+subplot(1,2,2);
+imagesc(flipud(mean((acc_timefreq(:,t_to_run-5,:)),3)));
+%imagesc(flipud(mean(temp_acc_real(t_to_run,:,:),3)'));
+colormap('hot');
+plot4paper('Time (sec)','Freq')
+set(gca,'YTick',1:6);
+set(gca,'YTickLabel',flipud(xaxislabels(2:end)));
+set(gca,'XTick',[1,11:10:51])
+set(gca,'XTickLabel',0:0.1:0.5)
+
+subplot(1,2,1);
+imagesc(flipud(mean(temp_acc_all(t_to_run,2:end,:),3)'));
+plot4paper('Time (sec)','Freq')
+set(gca,'YTick',1:6);
+set(gca,'YTickLabel',flipud(xaxislabels(2:end)));
+set(gca,'XTick',[1,11:10:51])
+set(gca,'XTickLabel',0:0.1:0.5)
+print([figdir,'Fig7D_TimeFreqComparison'],'-dpng');
+subplot(1,2,2);
+imagesc(flipud(mean((acc_timefreq(:,t_to_run-5,:)),3)));
+%imagesc(flipud(mean(temp_acc_real(t_to_run,:,:),3)'));
+colormap('hot');
+plot4paper('Time (sec)','Freq')
+set(gca,'YTick',1:6);
+set(gca,'YTickLabel',flipud(xaxislabels(2:end)));
+set(gca,'XTick',[1,11:10:51])
+set(gca,'XTickLabel',0:0.1:0.5)
+colorbar;
+subplot(1,2,1);
+imagesc(flipud(mean(temp_acc_all(t_to_run,2:end,:),3)'));
+plot4paper('Time (sec)','Freq')
+set(gca,'YTick',1:6);
+set(gca,'YTickLabel',flipud(xaxislabels(2:end)));
+set(gca,'XTick',[1,11:10:51])
+set(gca,'XTickLabel',0:0.1:0.5)
+colorbar;
+print([figdir,'Fig7D_TimeFreqComparison_colorbar'],'-dpng');
 
 %% FIGURE 7: Plot results of aggregate decoding
 nF = 7;
