@@ -259,10 +259,12 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
         ticks_mi = np.linspace(0, 6, 4)
         ticks_mipow = np.linspace(0, 3, 4)
 
+        ylim0 = (-2, 2)
         ylim1 = (0, 6)
         ylim2 = (0, 3)
+        ylim3 = (0, 2)
     elif example == 2:
-        # This example has multiple frequncy components:
+        # This example has multiple frequency components:
         f1 = 10.0
         f2 = 1.5 * f1
 
@@ -280,8 +282,10 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
         ticks_mi = np.linspace(0, 1.5, 4)
         ticks_mipow = np.linspace(0, 0.5, 6)
 
+        ylim0 = (-2, 2)
         ylim1 = (0, 1.6)
         ylim2 = (0, 0.5)
+        ylim3 = (0, 2)
 
     theta = np.array([[-np.pi / 2, -np.pi / 2], [-np.pi / 2, -np.pi / 2]])
     theta0 = theta
@@ -371,6 +375,8 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
         ticks_mipow = np.linspace(0, np.ceil(np.max(r_b)), int(2 * np.ceil(np.max(r_b)) + 1))
         ylim1 = (0, np.ceil(np.max(infotermest)))
         ylim2 = (0, np.ceil(np.max(r_b)))
+        ylim0 = np.max((np.max(x0[0] + s[0]), np.max(x0[1] + s[1]), np.max(xa[0] + s[0]), np.max(xa[1] + s[1])))
+        ylim3 = (0, 1.2*np.max((np.max(a0), np.max(a))))
 
     example = 0
 
@@ -431,7 +437,7 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
                 col=1
             )
             # fig.update_layout(xaxis=dict(title_text="Time (s)"), yaxis=dict(title_text="Magnitude"))
-            fig.update_yaxes(dict(title_text=f"CHANNEL {k + 1} <br> Magnitude"), range=[-2, 2], row=k + 1, col=1)
+            fig.update_yaxes(dict(title_text=f"CHANNEL {k + 1} <br> Magnitude"), range=[-ylim0, ylim0], row=k + 1, col=1)
         else:
             fig.add_trace(
                 go.Scatter(
@@ -475,7 +481,7 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
                     row=k + 1,
                     col=2
                 )
-            fig.update_yaxes(dict(title_text=f"PSD"), range=ylim0, row=k + 1, col=2)
+            fig.update_yaxes(dict(title_text=f"PSD"), range=ylim3, row=k + 1, col=2)
             fig.update_xaxes(range=[0, 40], row=k + 1, col=2)
         else:
             for i in np.where(r_b > 0)[0]:
