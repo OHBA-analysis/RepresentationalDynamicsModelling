@@ -479,6 +479,8 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
             fig.update_xaxes(range=[0, 40], row=k + 1, col=2)
         else:
             for i in np.where(r_b > 0)[0]:
+                if np.logical_and(f1 == f2, i != 2): # frequency components are the same. Only plot the sum of information terms
+                    continue
                 fig.add_trace(
                     go.Scatter(
                         x=[freqs_all[i], freqs_all[i]],
