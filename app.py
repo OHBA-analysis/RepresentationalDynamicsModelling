@@ -2,9 +2,8 @@
 # -*- coding: utf-8 -*-
 """
 @author: MWJ van Es, 2022
-inspired by M. Fabus (https://gitlab.com/marcoFabus/fabus2022_harmonics/-/blob/main/app.py)
+Copyright University of Oxford
 """
-
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 import dash
@@ -69,7 +68,6 @@ def card_amp(header, name, props):
             ]
         )
     ]
-
     return card_content
 
 
@@ -114,7 +112,6 @@ def card_freq(header, name, props):
             ]
         )
     ]
-
     return card_content
 
 
@@ -133,15 +130,12 @@ radioitems = html.Div(
     ]
 )
 
-# %% Example plotly figure
+# %% App settings
 headers = ['Frequency (Hz)', 'Condition 1', 'Condition 2']
 names = [str(i) for i in range(10)]
 
-marks_amp = {str(x): {'label': str(round(x, 2)), 'style': {'color': 'black'}} for x in np.linspace(0, 2, 9)}
-marks_f = {str(int(x)): {'label': str(round(x)), 'style': {'color': 'black'}} for x in np.linspace(0, 20, 5)}
-
-props_amp = [0, 2, [1.5, 0, 0.75, 0], 0.25, marks_amp]
-props_f = [1, 20, [10, 0], 1, marks_f]
+props_amp = [0, 2, [1.5, 0, 0.75, 0], 0.25]
+props_f = [1, 20, [10, 0], 1]
 
 instructions = html.Div(
     [
@@ -170,7 +164,7 @@ instructions = html.Div(
                             information content oscillates with twice the original frequency."),
                         html.H5(" "),
                         html.P("\
-                            App created by Mats W.J. van Es, 2022"),
+                            App created by Mats W.J. van Es, 2022, Copyright University of Oxford"),
                     ])),
             ],
             id="modal-fs",
@@ -254,17 +248,8 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
         s2ch2f1 = 0  # magnitude of signal 2, channel 2, frequency component 1
         s2ch2f2 = 0  # magnitude of signal 2, channel 2, frequency component 2
 
-        ticks_amp = np.linspace(-2, 2, 5)
-        ticks_pow = np.linspace(0, 2, 5)
-        ticks_mi = np.linspace(0, 6, 4)
-        ticks_mipow = np.linspace(0, 3, 4)
-
-        ylim0 = 2
-        ylim1 = (0, 6)
-        ylim2 = (0, 3)
-        ylim3 = (0, 2)
     elif example == 2:
-        # This example has multiple frequency components:
+        # frequency
         f1 = 10.0
         f2 = 1.5 * f1
 
@@ -276,16 +261,6 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
         s2ch1f2 = 0.9 * 0.6  # magnitude of signal 2, channel 1, frequency component 1
         s2ch2f1 = s2ch1f1  # magnitude of signal 2, channel 1, frequency component 1
         s2ch2f2 = s2ch1f2  # magnitude of signal 2, channel 1, frequency component 1
-
-        ticks_amp = np.linspace(-2, 2, 5)
-        ticks_pow = np.linspace(0, 2, 5)
-        ticks_mi = np.linspace(0, 1.5, 4)
-        ticks_mipow = np.linspace(0, 0.5, 6)
-
-        ylim0 = 2
-        ylim1 = (0, 1.6)
-        ylim2 = (0, 0.5)
-        ylim3 = (0, 2)
 
     theta = np.array([[-np.pi / 2, -np.pi / 2], [-np.pi / 2, -np.pi / 2]])
     theta0 = theta
@@ -361,23 +336,12 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
         infotermest = infotermest + r_b[ifreq] * np.cos(2 * np.pi * freqs_all[ifreq] * t + psi[ifreq])
 
     # Figure parameters
-    ticks_time = np.linspace(0, 0.1, 3)
-    ticks_freq = np.linspace(0, 40, 3)
+    ylim0 = np.max((np.max(x0[0] + s[0]), np.max(x0[1] + s[1]), np.max(xa[0] + s[0]), np.max(xa[1] + s[1])))
+    ylim1 = (0, np.ceil(np.max(infotermest)))
+    ylim2 = (0, 1.2 * np.max((np.max(a0), np.max(a))))
+    ylim3 = (0, np.ceil(np.max(r_b)))
 
-    if not np.logical_or(example == 1, example == 2):
-        ticks_amp = np.linspace(int(np.floor(np.min((np.min(xa[0]) - s[0], np.min(xa[1]) - s[1])))),
-                                int(np.ceil(np.max((np.max(xa[0]) + s[0], np.max(xa[1]) + s[1])))),
-                                int(np.diff((np.floor(np.min((np.min(xa[0]) - s[0], np.min(xa[1]) - s[1]))),
-                                             np.ceil(np.max((np.max(xa[0]) + s[0], np.max(xa[1]) + s[1])))))[0] + 1))
-        ticks_pow = np.linspace(0, np.max((np.max(a), np.max(a0))), int(2 * np.max((np.max(a), np.max(a0))) + 1))
-        ticks_mi = np.linspace(0, np.ceil(np.max(infotermest)), int(2 * np.ceil(np.max(infotermest)) + 1))
-        ticks_mipow = np.linspace(0, np.ceil(np.max(r_b)), int(2 * np.ceil(np.max(r_b)) + 1))
-        ylim1 = (0, np.ceil(np.max(infotermest)))
-        ylim2 = (0, np.ceil(np.max(r_b)))
-        ylim0 = np.max((np.max(x0[0] + s[0]), np.max(x0[1] + s[1]), np.max(xa[0] + s[0]), np.max(xa[1] + s[1])))
-        ylim3 = (0, 1.2*np.max((np.max(a0), np.max(a))))
-
-    example = 0
+    example = 0  # reset example
 
     # %% Plot everything
     fig = make_subplots(rows=3, cols=2,
@@ -436,7 +400,8 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
                 col=1
             )
             # fig.update_layout(xaxis=dict(title_text="Time (s)"), yaxis=dict(title_text="Magnitude"))
-            fig.update_yaxes(dict(title_text=f"CHANNEL {k + 1} <br> Magnitude"), range=[-ylim0, ylim0], row=k + 1, col=1)
+            fig.update_yaxes(dict(title_text=f"CHANNEL {k + 1} <br> Magnitude"), range=[-ylim0, ylim0], row=k + 1,
+                             col=1)
         else:
             fig.add_trace(
                 go.Scatter(
@@ -480,11 +445,12 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
                     row=k + 1,
                     col=2
                 )
-            fig.update_yaxes(dict(title_text=f"PSD"), range=ylim3, row=k + 1, col=2)
-            fig.update_xaxes(range=[0, 40], row=k + 1, col=2)
+            fig.update_yaxes(dict(title_text=f"PSD"), range=ylim2, row=k + 1, col=2)
+            fig.update_xaxes(range=[0, 45], row=k + 1, col=2)
         else:
             for i in np.where(r_b > 0)[0]:
-                if np.logical_and(f1 == f2, r_b[i] != np.max(r_b[:-1])): # frequency components are the same. Only plot the sum of information terms
+                if np.logical_and(f1 == f2, r_b[i] != np.max(
+                        r_b[:-1])):  # frequency components are the same. Only plot the nonzero information term
                     continue
                 fig.add_trace(
                     go.Scatter(
@@ -498,12 +464,12 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
                     row=k + 1,
                     col=2
                 )
-            fig.update_xaxes(dict(title_text="Frequency (Hz)"), range=[0, 40], row=k + 1, col=2)
-            fig.update_yaxes(dict(title_text="PSD"), range=ylim2, row=k + 1, col=2)
+            fig.update_xaxes(dict(title_text="Frequency (Hz)"), range=[0, 45], row=k + 1, col=2)
+            fig.update_yaxes(dict(title_text="PSD"), range=ylim3, row=k + 1, col=2)
 
     return [fig, example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, s2ch1f2, s2ch2f1, s2ch2f2]
 
+
 if __name__ == '__main__':
-    # app.run_server(host='0.0.0.0', debug=True)
     app.debug = True
     app.run()
