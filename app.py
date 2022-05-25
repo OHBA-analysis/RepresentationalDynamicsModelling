@@ -339,7 +339,7 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
     ylim0 = np.max((np.max(x0[0] + s[0]), np.max(x0[1] + s[1]), np.max(xa[0] + s[0]), np.max(xa[1] + s[1])))
     ylim1 = (0, np.ceil(np.max(infotermest)))
     ylim2 = (0, 1.2 * np.max((np.max(a0), np.max(a))))
-    ylim3 = (0, np.ceil(np.max(r_b)))
+    ylim3 = (0, 1.2*np.max(r_b))
 
     example = 0  # reset example
 
