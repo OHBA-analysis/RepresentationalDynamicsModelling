@@ -7,6 +7,12 @@
 % Data URL for download:
 % http://userpage.fu-berlin.de/rmcichy/fusion_project_page/main.html
 
+% note that this script has a dependency on the hmm-mar toolbox, which can
+% be found here: https://github.com/OHBA-analysis/HMM-MAR
+if isempty(which('hmmmar'))
+    error('This script requires the hmmmar toolbox, which cannot be found on the path');
+end
+
 % Set directories:
 rawdatadirdir = 'F:\My Data\Cichy2014\';
 workingdir = 'C:\Users\chiggins\Documents\Cichy2020Analysis\';
