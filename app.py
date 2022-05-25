@@ -145,29 +145,22 @@ instructions = html.Div(
                 dbc.ModalHeader(dbc.ModalTitle("Instructions")),
                 dbc.ModalBody(
                     html.Div([
-                        html.A("This app is hosting Van Es (2022)",
-                               href='https://doi.org/10.5281/zenodo.6579997', target="_blank"),
-                        html.A("The simulator is based on the work in Higgins et al (2022)",
-                               href='https://doi.org/10.1101/2022.02.07.479399', target="_blank"),
-                        html.H5(""),
-                        html.P(
-                            "In this simulator we illustrate the relationship between\
+                        dcc.Markdown("This app is hosting [Van Es (2022)](https://doi.org/10.5281/zenodo.6579997), \
+                        and is based on the work in [Higgins et al. (2022)](https://doi.org/10.1101/2022.02.07.479399).\
+                        \n Please cite as: *Van Es, M.W.J. (2022). Representational Dynamics Simulator.\
+                        Zenodo. doi: 10.5281/zenodo.6579997.* \
+                        \n\nIn this simulator we illustrate the relationship between\
                             the frequency content of a (neural) signal and the subsequent\
                             decoding accuracy metrics when we use instantaneous signal\
-                            decoding."),
-                        html.H5(" "),
-                        html.P("\
-                            We simulate two conditions across two channels, each of which \
+                            decoding.\
+                            \n We simulate two conditions across two channels, each of which \
                             are made up out of a maximum two frequency components. The  \
                             frequencies and the amplitudes in each condition and channel \
                             can be changed using the sliders. Example 1/2 can be toggled to\
                             see the examples corresponding to figure 2 in Higgins et al (2022).\
                             We can see that when we use instantaneous signal decoding, the\
-                            information content oscillates with twice the original frequency."),
-                        html.H5(" "),
-                        html.P("\ App created by Mats W.J. van Es, 2022, Copyright University of Oxford \
-                               Please cite as: \
-                               Van Es, M.W.J. (2022). Representational Dynamics Simulator. Zenodo. https://doi.org/10.5281/zenodo.6579997"),
+                            information content oscillates with twice the original frequency. \
+                            \n\nApp created by Mats W.J. van Es, 2022, Copyright University of Oxford."),
                     ])),
             ],
             id="modal-fs",
