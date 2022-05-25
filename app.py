@@ -259,7 +259,7 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
         ticks_mi = np.linspace(0, 6, 4)
         ticks_mipow = np.linspace(0, 3, 4)
 
-        ylim0 = (-2, 2)
+        ylim0 = 2
         ylim1 = (0, 6)
         ylim2 = (0, 3)
         ylim3 = (0, 2)
@@ -282,7 +282,7 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
         ticks_mi = np.linspace(0, 1.5, 4)
         ticks_mipow = np.linspace(0, 0.5, 6)
 
-        ylim0 = (-2, 2)
+        ylim0 = 2
         ylim1 = (0, 1.6)
         ylim2 = (0, 0.5)
         ylim3 = (0, 2)
@@ -361,7 +361,6 @@ def update_figure(example, f1, f2, s1ch1f1, s1ch1f2, s1ch2f1, s1ch2f2, s2ch1f1, 
         infotermest = infotermest + r_b[ifreq] * np.cos(2 * np.pi * freqs_all[ifreq] * t + psi[ifreq])
 
     # Figure parameters
-    ylim0 = (0, 2)
     ticks_time = np.linspace(0, 0.1, 3)
     ticks_freq = np.linspace(0, 40, 3)
 
