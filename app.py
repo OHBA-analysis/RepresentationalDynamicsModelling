@@ -147,7 +147,7 @@ instructions = html.Div(
                     html.Div([
                         dcc.Markdown("This app is hosting [Van Es (2022)](https://doi.org/10.5281/zenodo.6579997), \
                         and is based on the work in [Higgins et al. (2022)](https://doi.org/10.1101/2022.02.07.479399).\
-                        \n Please cite as: *Van Es, M.W.J. (2022). Representational Dynamics Simulator.\
+                        \n Please cite as: *Van Es, M.W.J., Higgins, C., Quinn, A.J., Vidaurre, D., Gould Van Praag, C.D., Fabus, M.S., Woolrich, M.W. (2022). Representational Dynamics Simulator.\
                         Zenodo. doi: 10.5281/zenodo.6579997.* \
                         \n\nIn this simulator we illustrate the relationship between\
                             the frequency content of a (neural) signal and the subsequent\
